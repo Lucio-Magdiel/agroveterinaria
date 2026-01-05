@@ -4,8 +4,8 @@ nixPkgs = ['php83', 'php83Extensions.pdo', 'php83Extensions.pdo_mysql', 'php83Ex
 [phases.build]
 cmds = [
     'composer install --optimize-autoloader --no-dev --no-interaction',
-    'npm ci --legacy-peer-deps',
-    'npm run build'
+    'npm install --legacy-peer-deps --prefer-offline --no-audit',
+    'NODE_OPTIONS="--max-old-space-size=2048" npm run build'
 ]
 
 [phases.deploy]
