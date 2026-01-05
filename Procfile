@@ -1,1 +1,1 @@
-web: php artisan config:clear && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=$PORT
+web: mkdir -p storage/framework/{sessions,views,cache} && mkdir -p storage/logs && chmod -R 775 storage bootstrap/cache && php artisan migrate:fresh --force && php artisan serve --host=0.0.0.0 --port=$PORT
