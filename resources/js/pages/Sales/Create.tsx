@@ -424,7 +424,7 @@ export default function SalesCreate({ products }: Props) {
                                             >
                                                 <SelectItem
                                                     key="efectivo"
-                                                >
+                                            >
                                                     💵 Efectivo
                                                 </SelectItem>
                                                 <SelectItem key="yape">
