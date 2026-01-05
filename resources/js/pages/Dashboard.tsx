@@ -170,13 +170,13 @@ export default function Dashboard({
                 {/* Grid de Información */}
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Métodos de Pago */}
-                    <Card className="shadow-xl rounded-3xl">
-                        <CardHeader className="pb-3">
+                    <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                        <CardHeader className="pb-4 px-6 pt-6">
                             <h3 className="text-xl font-bold">
                                 Ventas por Método de Pago
                             </h3>
                         </CardHeader>
-                        <CardBody className="pt-2">
+                        <CardBody className="px-6 pb-6">
                             {metrics.sales_by_payment.length > 0 ? (
                                 <div className="space-y-4">
                                     {metrics.sales_by_payment.map(
@@ -211,8 +211,8 @@ export default function Dashboard({
                     </Card>
 
                     {/* Productos con Stock Bajo */}
-                    <Card className="shadow-xl rounded-3xl bg-danger-50/50 dark:bg-danger-50/10">
-                        <CardHeader className="pb-3">
+                    <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border border-danger/20">
+                        <CardHeader className="pb-4 px-6 pt-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-3 bg-danger rounded-2xl">
                                     <AlertTriangle className="h-6 w-6 text-danger-foreground" />
@@ -222,7 +222,7 @@ export default function Dashboard({
                                 </h3>
                             </div>
                         </CardHeader>
-                        <CardBody className="pt-2">
+                        <CardBody className="px-6 pb-6">
                             {low_stock_products.length > 0 ? (
                                 <div className="space-y-3">
                                     {low_stock_products.map((product) => (
@@ -259,13 +259,13 @@ export default function Dashboard({
                 </div>
 
                 {/* Ventas Recientes */}
-                <Card className="shadow-xl rounded-3xl">
-                    <CardHeader className="pb-3">
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardHeader className="pb-4 px-6 pt-6">
                         <h3 className="text-xl font-bold">
                             Últimas Ventas del Día
                         </h3>
                     </CardHeader>
-                    <CardBody className="pt-2">
+                    <CardBody className="px-6 pb-6">
                         {today_sales.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full">

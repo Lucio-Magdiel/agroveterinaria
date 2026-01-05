@@ -5,7 +5,6 @@ import {
     CardBody,
     CardHeader,
     Button,
-    Input,
     Chip,
     Table,
     TableHeader,
@@ -14,8 +13,8 @@ import {
     TableRow,
     TableCell,
 } from '@heroui/react';
-import { ArrowLeft, Download, Calendar, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, TrendingUp, ShoppingCart, Receipt } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface Props {
     sales: any[];
@@ -42,8 +41,13 @@ export default function ReportsSales({
     const [dateFrom, setDateFrom] = useState(filters.date_from);
     const [dateTo, setDateTo] = useState(filters.date_to);
 
+    useEffect(() => {
+        setDateFrom(filters.date_from);
+        setDateTo(filters.date_to);
+    }, [filters]);
+
     const handleFilter = () => {
-        router.get('/reports/sales', { date_from: dateFrom, date_to: dateTo });
+        router.get('/reports/sales', { date_from: dateFrom, date_to: dateTo }, { preserveState: true });
     };
 
     const formatCurrency = (amount: number) => {
@@ -64,7 +68,7 @@ export default function ReportsSales({
                             variant="flat"
                             startContent={<ArrowLeft className="h-4 w-4" />}
                             onPress={() => router.get('/reports')}
-                            className="mb-2"
+                            className="mb-2 rounded-xl"
                         >
                             Volver
                         </Button>
@@ -78,100 +82,125 @@ export default function ReportsSales({
                 </div>
 
                 {/* Filtros */}
-                <Card>
-                    <CardBody>
-                        <div className="flex flex-wrap items-end gap-3">
-                            <Input
-                                type="date"
-                                label="Fecha Desde"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                className="w-full md:w-auto"
-                            />
-                            <Input
-                                type="date"
-                                label="Fecha Hasta"
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                className="w-full md:w-auto"
-                            />
-                            <Button color="primary" onPress={handleFilter}>
-                                Aplicar Filtros
-                            </Button>
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardHeader className="pb-4 px-6 pt-6">
+                        <div className="grid w-full gap-4 md:grid-cols-3">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Fecha Desde</label>
+                                <input
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    className="px-3 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 focus:outline-none focus:border-primary/70 transition-colors"
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Fecha Hasta</label>
+                                <input
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={(e) => setDateTo(e.target.value)}
+                                    className="px-3 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 focus:outline-none focus:border-primary/70 transition-colors"
+                                />
+                            </div>
+
+                            <div className="flex items-end">
+                                <Button 
+                                    color="primary" 
+                                    onPress={handleFilter}
+                                    size="lg"
+                                    className="w-full rounded-2xl font-semibold"
+                                >
+                                    Aplicar Filtros
+                                </Button>
+                            </div>
                         </div>
-                    </CardBody>
+                    </CardHeader>
                 </Card>
 
                 {/* Resumen */}
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="border-2 border-primary">
-                        <CardBody>
+                <div className="grid gap-6 md:grid-cols-3">
+                    <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none overflow-visible">
+                        <CardBody className="p-6">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <p className="text-sm text-default-500">
+                                    <p className="text-sm font-medium text-default-500 mb-2">
                                         Total Vendido
                                     </p>
-                                    <h2 className="text-3xl font-bold text-primary">
+                                    <h2 className="text-4xl font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
                                         {formatCurrency(summary.total_revenue)}
                                     </h2>
                                 </div>
-                                <TrendingUp className="h-8 w-8 text-primary" />
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20">
+                                    <TrendingUp className="h-7 w-7 text-primary" />
+                                </div>
                             </div>
                         </CardBody>
                     </Card>
 
-                    <Card>
-                        <CardBody>
-                            <div>
-                                <p className="text-sm text-default-500">
-                                    Número de Ventas
-                                </p>
-                                <h2 className="text-3xl font-bold">
-                                    {summary.total_sales}
-                                </h2>
-                                <p className="mt-1 text-xs text-default-400">
-                                    ventas completadas
-                                </p>
+                    <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none overflow-visible">
+                        <CardBody className="p-6">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-default-500 mb-2">
+                                        Número de Ventas
+                                    </p>
+                                    <h2 className="text-4xl font-bold">
+                                        {summary.total_sales}
+                                    </h2>
+                                    <p className="mt-2 text-xs text-default-400">
+                                        ventas completadas
+                                    </p>
+                                </div>
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-success/20">
+                                    <ShoppingCart className="h-7 w-7 text-success" />
+                                </div>
                             </div>
                         </CardBody>
                     </Card>
 
-                    <Card>
-                        <CardBody>
-                            <div>
-                                <p className="text-sm text-default-500">
-                                    Ticket Promedio
-                                </p>
-                                <h2 className="text-3xl font-bold">
-                                    {formatCurrency(summary.average_ticket)}
-                                </h2>
-                                <p className="mt-1 text-xs text-default-400">
-                                    por venta
-                                </p>
+                    <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none overflow-visible">
+                        <CardBody className="p-6">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-default-500 mb-2">
+                                        Ticket Promedio
+                                    </p>
+                                    <h2 className="text-4xl font-bold">
+                                        {formatCurrency(summary.average_ticket)}
+                                    </h2>
+                                    <p className="mt-2 text-xs text-default-400">
+                                        por venta
+                                    </p>
+                                </div>
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-warning/20">
+                                    <Receipt className="h-7 w-7 text-warning" />
+                                </div>
                             </div>
                         </CardBody>
                     </Card>
                 </div>
 
                 {/* Ventas por Método de Pago */}
-                <Card>
-                    <CardHeader>
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardHeader className="px-6 pt-6 pb-4">
                         <h3 className="text-lg font-semibold">
                             Ventas por Método de Pago
                         </h3>
                     </CardHeader>
-                    <CardBody>
-                        <div className="grid gap-3 md:grid-cols-2">
+                    <CardBody className="px-6 pb-6">
+                        <div className="grid gap-4 md:grid-cols-2">
                             {sales_by_payment_method.map((payment) => (
                                 <div
                                     key={payment.payment_method}
-                                    className="flex items-center justify-between rounded-lg bg-default-100 p-4"
+                                    className="flex items-center justify-between rounded-2xl bg-default-100 dark:bg-default-50/5 p-5 border border-default-200/50 dark:border-default-100/10"
                                 >
                                     <div>
-                                        <p className="text-lg font-semibold capitalize">
+                                        <p className="text-base font-semibold capitalize mb-1">
                                             {payment.payment_method === 'efectivo'
-                                                ? '💵 Efectivo'
-                                                : '📱 Yape'}
+                                                ? 'Efectivo'
+                                                : 'Yape'}
                                         </p>
                                         <p className="text-sm text-default-500">
                                             {payment.count} ventas
@@ -188,14 +217,21 @@ export default function ReportsSales({
 
                 {/* Ventas por Día */}
                 {sales_by_day.length > 0 && (
-                    <Card>
-                        <CardHeader>
+                    <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                        <CardHeader className="px-6 pt-6 pb-4">
                             <h3 className="text-lg font-semibold">
                                 Ventas por Día
                             </h3>
                         </CardHeader>
-                        <CardBody>
-                            <Table aria-label="Ventas por día">
+                        <CardBody className="px-6 pb-6">
+                            <Table 
+                                aria-label="Ventas por día"
+                                classNames={{
+                                    wrapper: "rounded-2xl shadow-none border border-default-200/50 dark:border-default-100/10",
+                                    th: "bg-default-100 dark:bg-default-50/5 text-default-700 dark:text-default-200 font-bold",
+                                    td: "py-4"
+                                }}
+                            >
                                 <TableHeader>
                                     <TableColumn>FECHA</TableColumn>
                                     <TableColumn>VENTAS</TableColumn>
@@ -215,11 +251,11 @@ export default function ReportsSales({
                                                 })}
                                             </TableCell>
                                             <TableCell>
-                                                <Chip size="sm">
+                                                <Chip size="sm" className="font-semibold">
                                                     {day.count} ventas
                                                 </Chip>
                                             </TableCell>
-                                            <TableCell className="font-semibold text-primary">
+                                            <TableCell className="font-bold text-primary text-lg">
                                                 {formatCurrency(day.total)}
                                             </TableCell>
                                         </TableRow>
@@ -231,14 +267,21 @@ export default function ReportsSales({
                 )}
 
                 {/* Listado de Ventas */}
-                <Card>
-                    <CardHeader>
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardHeader className="px-6 pt-6 pb-4">
                         <h3 className="text-lg font-semibold">
                             Detalle de Ventas
                         </h3>
                     </CardHeader>
-                    <CardBody>
-                        <Table aria-label="Listado de ventas">
+                    <CardBody className="px-6 pb-6">
+                        <Table 
+                            aria-label="Listado de ventas"
+                            classNames={{
+                                wrapper: "rounded-2xl shadow-none border border-default-200/50 dark:border-default-100/10",
+                                th: "bg-default-100 dark:bg-default-50/5 text-default-700 dark:text-default-200 font-bold",
+                                td: "py-4"
+                            }}
+                        >
                             <TableHeader>
                                 <TableColumn>N° VENTA</TableColumn>
                                 <TableColumn>FECHA</TableColumn>
@@ -246,10 +289,10 @@ export default function ReportsSales({
                                 <TableColumn>PAGO</TableColumn>
                                 <TableColumn>TOTAL</TableColumn>
                             </TableHeader>
-                            <TableBody>
+                            <TableBody emptyContent="No hay ventas en este periodo">
                                 {sales.map((sale) => (
                                     <TableRow key={sale.id}>
-                                        <TableCell className="font-mono text-sm">
+                                        <TableCell className="font-mono text-sm font-semibold">
                                             {sale.sale_number}
                                         </TableCell>
                                         <TableCell>
@@ -264,7 +307,7 @@ export default function ReportsSales({
                                         <TableCell className="capitalize">
                                             {sale.payment_method}
                                         </TableCell>
-                                        <TableCell className="font-semibold text-primary">
+                                        <TableCell className="font-bold text-primary text-lg">
                                             {formatCurrency(sale.total)}
                                         </TableCell>
                                     </TableRow>

@@ -61,6 +61,10 @@ class ProductController extends Controller
         }
 
         Product::create($validated);
+        if ($request->boolean('stay_on_category') && $request->filled('category_id')) {
+            return redirect()->route('categories.show', $request->input('category_id'))
+                ->with('success', 'Producto creado exitosamente.');
+        }
 
         return redirect()->route('products.index')
             ->with('success', 'Producto creado exitosamente.');
@@ -91,6 +95,10 @@ class ProductController extends Controller
         }
 
         $product->update($validated);
+        if ($request->boolean('stay_on_category') && $request->filled('category_id')) {
+            return redirect()->route('categories.show', $request->input('category_id'))
+                ->with('success', 'Producto actualizado exitosamente.');
+        }
 
         return redirect()->route('products.index')
             ->with('success', 'Producto actualizado exitosamente.');
@@ -110,5 +118,14 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')
             ->with('success', 'Producto eliminado exitosamente.');
+    }
+
+    public function toggleStatus(Product $product)
+    {
+        $product->update([
+            'is_active' => !$product->is_active
+        ]);
+
+        return back()->with('success', 'Estado del producto actualizado.');
     }
 }

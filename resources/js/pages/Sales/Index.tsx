@@ -74,7 +74,7 @@ export default function SalesIndex({ sales, filters }: Props) {
     };
 
     const getPaymentMethodLabel = (method: string) => {
-        return method === 'efectivo' ? '💵 Efectivo' : '📱 Yape';
+        return method === 'efectivo' ? 'Efectivo' : 'Yape';
     };
 
     return (
@@ -90,65 +90,81 @@ export default function SalesIndex({ sales, filters }: Props) {
                         </p>
                     </div>
                     <Button
-                        color="primary"
+                        color="success"
                         size="lg"
                         startContent={<Plus className="h-5 w-5" />}
                         onPress={() => router.get('/sales/create')}
+                        className="shadow-lg rounded-2xl font-semibold bg-green-600 hover:bg-green-700 text-white"
                     >
                         Nueva Venta
                     </Button>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <div className="grid w-full gap-2 md:grid-cols-4">
-                            <Input
-                                placeholder="Buscar por número..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                onKeyPress={(e) =>
-                                    e.key === 'Enter' && handleSearch()
-                                }
-                                startContent={<Search className="h-4 w-4" />}
-                            />
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardHeader className="pb-4 px-6 pt-6">
+                        <div className="grid w-full gap-4 md:grid-cols-4">
+                            <div className="flex flex-col gap-2 md:col-span-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Buscar por número</label>
+                                <div className="relative">
+                                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-default-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: VTA-0001"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                        className="w-full px-10 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 placeholder:text-default-400 focus:outline-none focus:border-primary/70 transition-colors"
+                                    />
+                                </div>
+                            </div>
 
-                            <Select
-                                placeholder="Estado"
-                                selectedKeys={status ? [status] : []}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
-                                <SelectItem key="completed" value="completed">
-                                    Completada
-                                </SelectItem>
-                                <SelectItem key="cancelled" value="cancelled">
-                                    Cancelada
-                                </SelectItem>
-                            </Select>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Estado</label>
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className="px-3 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 focus:outline-none focus:border-primary/70 transition-colors [&>option]:dark:bg-[#18181b] [&>option]:dark:text-default-200"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="completed">Completada</option>
+                                    <option value="cancelled">Cancelada</option>
+                                </select>
+                            </div>
 
-                            <Select
-                                placeholder="Método de Pago"
-                                selectedKeys={
-                                    paymentMethod ? [paymentMethod] : []
-                                }
-                                onChange={(e) =>
-                                    setPaymentMethod(e.target.value)
-                                }
-                            >
-                                <SelectItem key="efectivo" value="efectivo">
-                                    Efectivo
-                                </SelectItem>
-                                <SelectItem key="yape" value="yape">
-                                    Yape
-                                </SelectItem>
-                            </Select>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Método de Pago</label>
+                                <select
+                                    value={paymentMethod}
+                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                    className="px-3 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 focus:outline-none focus:border-primary/70 transition-colors [&>option]:dark:bg-[#18181b] [&>option]:dark:text-default-200"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="yape">Yape</option>
+                                </select>
+                            </div>
 
-                            <Button color="primary" onPress={handleSearch}>
-                                Buscar
-                            </Button>
+                            <div className="flex items-end">
+                                <Button 
+                                    color="primary" 
+                                    onPress={handleSearch}
+                                    size="lg"
+                                    className="w-full rounded-2xl font-semibold"
+                                >
+                                    Buscar
+                                </Button>
+                            </div>
                         </div>
                     </CardHeader>
-                    <CardBody>
-                        <Table aria-label="Tabla de ventas">
+                    <CardBody className="pt-2">
+                        <Table 
+                            aria-label="Tabla de ventas"
+                            classNames={{
+                                wrapper: "rounded-2xl shadow-none",
+                                th: "bg-default-100 text-default-700 font-bold",
+                                td: "py-4"
+                            }}
+                        >
                             <TableHeader>
                                 <TableColumn>N° VENTA</TableColumn>
                                 <TableColumn>VENDEDOR</TableColumn>

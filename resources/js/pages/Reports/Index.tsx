@@ -27,12 +27,12 @@ export default function ReportsIndex() {
                     <Card
                         isPressable
                         onPress={() => router.get('/reports/sales')}
-                        className="border-2 hover:border-primary"
+                        className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none hover:scale-[1.02] transition-transform"
                     >
-                        <CardHeader>
+                        <CardHeader className="pb-4 px-6 pt-6">
                             <div className="flex w-full items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/10">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10">
                                         <TrendingUp className="h-6 w-6 text-blue-500" />
                                     </div>
                                     <div>
@@ -46,16 +46,11 @@ export default function ReportsIndex() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardBody>
+                        <CardBody className="px-6 pb-6">
                             <p className="text-sm text-default-600">
                                 Ver ventas por período, métodos de pago,
                                 tendencias y comparativas.
                             </p>
-                            <div className="mt-4 flex gap-2">
-                                <Button size="sm" color="primary">
-                                    Ver Reporte
-                                </Button>
-                            </div>
                         </CardBody>
                     </Card>
 
@@ -63,12 +58,12 @@ export default function ReportsIndex() {
                     <Card
                         isPressable
                         onPress={() => router.get('/reports/products')}
-                        className="border-2 hover:border-primary"
+                        className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none hover:scale-[1.02] transition-transform"
                     >
-                        <CardHeader>
+                        <CardHeader className="pb-4 px-6 pt-6">
                             <div className="flex w-full items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/10">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/10">
                                         <Package className="h-6 w-6 text-green-500" />
                                     </div>
                                     <div>
@@ -82,22 +77,21 @@ export default function ReportsIndex() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardBody>
+                        <CardBody className="px-6 pb-6">
                             <p className="text-sm text-default-600">
                                 Productos más vendidos, stock bajo, productos
                                 próximos a vencer.
                             </p>
-                            <div className="mt-4 flex gap-2">
-                                <Button size="sm" color="primary">
-                                    Ver Reporte
-                                </Button>
-                            </div>
                         </CardBody>
                     </Card>
 
                     {/* Reporte de Inventario */}
-                    <Card className="border-2 opacity-60">
-                        <CardHeader>
+                    <Card
+                        isPressable
+                        onPress={() => router.get('/reports/inventory')}
+                        className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none hover:scale-[1.02] transition-transform"
+                    >
+                        <CardHeader className="pb-4 px-6 pt-6">
                             <div className="flex w-full items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
@@ -114,16 +108,11 @@ export default function ReportsIndex() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardBody>
+                        <CardBody className="px-6 pb-6">
                             <p className="text-sm text-default-600">
                                 Historial de entradas, salidas y ajustes de
-                                inventario.
+                                inventario con filtros y resumen.
                             </p>
-                            <div className="mt-4">
-                                <p className="text-xs text-warning">
-                                    Próximamente
-                                </p>
-                            </div>
                         </CardBody>
                     </Card>
                 </div>
@@ -140,7 +129,7 @@ export default function ReportsIndex() {
                             <Button
                                 variant="flat"
                                 className="justify-start"
-                                startContent={<Calendar className="h-4 w-4" />}
+                                startContent={<Calendar className="h-4 w-4 text-blue-500" />}
                                 onPress={() =>
                                     router.get('/reports/sales', {
                                         date_from: new Date().toISOString().split('T')[0],
@@ -153,7 +142,7 @@ export default function ReportsIndex() {
                             <Button
                                 variant="flat"
                                 className="justify-start"
-                                startContent={<Package className="h-4 w-4" />}
+                                startContent={<Package className="h-4 w-4 text-green-500" />}
                                 onPress={() =>
                                     router.get('/reports/products')
                                 }
@@ -163,7 +152,7 @@ export default function ReportsIndex() {
                             <Button
                                 variant="flat"
                                 className="justify-start"
-                                startContent={<TrendingUp className="h-4 w-4" />}
+                                startContent={<TrendingUp className="h-4 w-4 text-blue-500" />}
                                 onPress={() =>
                                     router.get('/reports/sales', {
                                         date_from: new Date(
@@ -182,7 +171,7 @@ export default function ReportsIndex() {
                             <Button
                                 variant="flat"
                                 className="justify-start"
-                                startContent={<FileText className="h-4 w-4" />}
+                                startContent={<FileText className="h-4 w-4 text-orange-500" />}
                                 onPress={() =>
                                     router.get('/reports/products')
                                 }

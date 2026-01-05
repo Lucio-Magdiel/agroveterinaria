@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, Link } from '@inertiajs/react';
+import { Switch as HeadlessSwitch } from '@headlessui/react';
 import {
     Card,
     CardBody,
@@ -17,7 +18,7 @@ import {
     TableRow,
     TableCell,
 } from '@heroui/react';
-import { Plus, Search, Edit2, Trash2, Tag, X, Eye, Check, XCircle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Tag, X, Eye, Check, XCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
 interface Category {
@@ -45,7 +46,7 @@ interface Props {
 
 export default function CategoriesIndex({ categories, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data, setData, post, put, processing, errors, reset } = useForm({
@@ -54,46 +55,38 @@ export default function CategoriesIndex({ categories, filters }: Props) {
         is_active: true,
     });
 
-    const openModal = () => {
-        reset();
+    const openModal = (category?: Category) => {
+        if (category) {
+            setEditingCategory(category);
+            setData({
+                name: category.name,
+                description: category.description || '',
+                is_active: category.is_active,
+            });
+        } else {
+            setEditingCategory(null);
+            reset();
+        }
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
+        setEditingCategory(null);
         reset();
     };
 
-    const handleCreate = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/categories', {
-            onSuccess: () => {
-                closeModal();
-            },
-        });
-    };
-
-    const startEdit = (category: Category) => {
-        setEditingId(category.id);
-        setData({
-            name: category.name,
-            description: category.description || '',
-            is_active: category.is_active,
-        });
-    };
-
-    const cancelEdit = () => {
-        setEditingId(null);
-        reset();
-    };
-
-    const saveEdit = (id: number) => {
-        put(`/categories/${id}`, {
-            onSuccess: () => {
-                setEditingId(null);
-                reset();
-            },
-        });
+        if (editingCategory) {
+            put(`/categories/${editingCategory.id}`, {
+                onSuccess: () => closeModal(),
+            });
+        } else {
+            post('/categories', {
+                onSuccess: () => closeModal(),
+            });
+        }
     };
 
     const handleDelete = (id: number) => {
@@ -111,13 +104,13 @@ export default function CategoriesIndex({ categories, filters }: Props) {
             <AppLayout>
                 <Head title="Categorías" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-8">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">
+                        <h1 className="text-2xl font-bold">
                             Categorías
                         </h1>
-                        <p className="text-default-500 mt-1">
+                        <p className="text-default-500">
                             Gestiona las categorías de productos
                         </p>
                     </div>
@@ -132,192 +125,115 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                     </Button>
                 </div>
 
-                <Card className="shadow-2xl rounded-3xl">
-                    <CardHeader className="pb-4">
-                        <div className="flex w-full items-center gap-3">
-                            <Input
-                                placeholder="Buscar categorías..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                onKeyPress={(e) =>
-                                    e.key === 'Enter' && handleSearch()
-                                }
-                                startContent={<Search className="h-5 w-5" />}
-                                className="flex-1"
-                                classNames={{
-                                    inputWrapper: "rounded-2xl"
-                                }}
-                                size="lg"
-                            />
-                            <Button 
-                                color="primary" 
-                                onPress={handleSearch}
-                                size="lg"
-                                className="rounded-2xl font-semibold px-8"
-                            >
-                                Buscar
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardBody className="pt-2">
-                        <Table 
-                            aria-label="Tabla de categorías"
-                            className="min-w-full"
-                            classNames={{
-                                wrapper: "rounded-2xl shadow-none",
-                                th: "bg-default-100 text-default-700 font-bold",
-                                td: "py-4"
-                            }}
-                        >
-                            <TableHeader>
-                                <TableColumn>NOMBRE</TableColumn>
-                                <TableColumn>DESCRIPCIÓN</TableColumn>
-                                <TableColumn>PRODUCTOS</TableColumn>
-                                <TableColumn>ESTADO</TableColumn>
-                                <TableColumn>ACCIONES</TableColumn>
-                            </TableHeader>
-                            <TableBody>
-                                {categories.data.map((category) => (
-                                    <TableRow key={category.id}>
-                                        <TableCell>
-                                            {editingId === category.id ? (
-                                                <Input
-                                                    value={data.name}
-                                                    onChange={(e) => setData('name', e.target.value)}
-                                                    isInvalid={!!errors.name}
-                                                    errorMessage={errors.name}
-                                                    size="sm"
-                                                    classNames={{
-                                                        inputWrapper: "rounded-lg"
-                                                    }}
-                                                />
-                                            ) : (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="p-1.5 bg-primary/10 rounded-lg">
-                                                        <Tag className="h-4 w-4 text-primary" />
-                                                    </div>
-                                                    <span className="font-semibold">{category.name}</span>
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === category.id ? (
-                                                <Textarea
-                                                    value={data.description}
-                                                    onChange={(e) => setData('description', e.target.value)}
-                                                    minRows={1}
-                                                    size="sm"
-                                                    classNames={{
-                                                        inputWrapper: "rounded-lg"
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span className="text-sm text-default-600">
-                                                    {category.description || '-'}
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip size="sm" variant="flat" color="primary">
-                                                {category.products_count}
-                                            </Chip>
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === category.id ? (
-                                                <div className="flex items-center gap-2">
-                                                    <Switch
-                                                        isSelected={data.is_active}
-                                                        onValueChange={(value) => setData('is_active', value)}
-                                                        size="sm"
-                                                        color="success"
-                                                    />
-                                                    <span className="text-xs">
-                                                        {data.is_active ? 'Activo' : 'Inactivo'}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <Chip
-                                                    size="sm"
-                                                    color={category.is_active ? 'success' : 'default'}
-                                                    variant="flat"
-                                                >
-                                                    {category.is_active ? 'Activo' : 'Inactivo'}
-                                                </Chip>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === category.id ? (
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        isIconOnly
-                                                        size="sm"
-                                                        color="success"
-                                                        variant="flat"
-                                                        onPress={() => saveEdit(category.id)}
-                                                        isLoading={processing}
-                                                        className="rounded-lg"
-                                                    >
-                                                        <Check className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        isIconOnly
-                                                        size="sm"
-                                                        color="danger"
-                                                        variant="flat"
-                                                        onPress={cancelEdit}
-                                                        isDisabled={processing}
-                                                        className="rounded-lg"
-                                                    >
-                                                        <XCircle className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        isIconOnly
-                                                        size="sm"
-                                                        variant="flat"
-                                                        color="primary"
-                                                        onPress={() => startEdit(category)}
-                                                        className="rounded-lg"
-                                                    >
-                                                        <Edit2 className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        isIconOnly
-                                                        size="sm"
-                                                        color="danger"
-                                                        variant="flat"
-                                                        onPress={() => handleDelete(category.id)}
-                                                        className="rounded-lg"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                <div className="flex w-full items-center gap-3 mb-4">
+                    <div className="flex-1 relative">
+                        <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-default-400" />
+                        <input
+                            type="text"
+                            placeholder="Buscar categorías..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            className="w-full px-12 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 placeholder:text-default-400 focus:outline-none focus:border-primary/70 transition-colors"
+                        />
+                    </div>
+                    <Button 
+                        color="primary" 
+                        onPress={handleSearch}
+                        size="lg"
+                        className="rounded-2xl font-semibold px-8"
+                    >
+                        Buscar
+                    </Button>
+                </div>
 
-                        {categories.last_page > 1 && (
-                            <div className="mt-4 flex justify-center">
-                                <Pagination
-                                    total={categories.last_page}
-                                    page={categories.current_page}
-                                    onChange={(page) =>
-                                        router.get('/categories', { page })
-                                    }
-                                />
-                            </div>
-                        )}
-                    </CardBody>
-                </Card>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {categories.data.map((category) => (
+                        <Link
+                            key={category.id}
+                            href={`/categories/${category.id}`}
+                            as="div"
+                            className="block"
+                        >
+                        <Card 
+                            className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none hover:scale-[1.02] transition-transform cursor-pointer"
+                        >
+                            <CardHeader className="flex justify-between items-start px-6 pt-6 pb-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-primary/10 rounded-xl">
+                                        <Tag className="h-6 w-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold line-clamp-1">{category.name}</h3>
+                                        <Chip
+                                            size="sm"
+                                            variant="flat"
+                                            color={category.is_active ? 'success' : 'danger'}
+                                            startContent={category.is_active ? (
+                                                <CheckCircle className="h-3.5 w-3.5" />
+                                            ) : (
+                                                <XCircle className="h-3.5 w-3.5" />
+                                            )}
+                                            className={`mt-1 rounded-lg w-fit ${category.is_active ? 'text-green-600' : 'text-red-600'}`}
+                                        >
+                                            {category.is_active ? 'Activo' : 'Inactivo'}
+                                        </Chip>
+                                    </div>
+                                </div>
+                                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        onPress={() => openModal(category)}
+                                        className="rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50"
+                                    >
+                                        <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        onPress={() => handleDelete(category.id)}
+                                        className="rounded-lg text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardBody className="px-6 py-4">
+                                <p className="text-sm text-default-500 line-clamp-2 min-h-[2.5rem]">
+                                    {category.description || 'Sin descripción disponible.'}
+                                </p>
+                                <div className="mt-4 flex items-center justify-between">
+                                    <Chip size="sm" variant="flat" color="primary" className="rounded-lg">
+                                        {category.products_count} Productos
+                                    </Chip>
+                                    <span className="text-xs text-default-400">
+                                        {new Date(category.updated_at).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            </CardBody>
+                        </Card>
+                        </Link>
+                    ))}
+                </div>
+
+                {categories.last_page > 1 && (
+                    <div className="mt-4 flex justify-center">
+                        <Pagination
+                            total={categories.last_page}
+                            page={categories.current_page}
+                            onChange={(page) =>
+                                router.get('/categories', { page })
+                            }
+                        />
+                    </div>
+                )}
             </div>
             </AppLayout>
 
-            {/* Modal solo para crear nuevas categorías */}
+            {/* Modal para crear/editar categorías */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
                     {/* Backdrop con animación */}
@@ -327,8 +243,8 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                     />
                     
                     {/* Modal Content con animación */}
-                    <div className="relative z-10 w-full max-w-3xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-divider">
-                        <form onSubmit={handleCreate} className="flex flex-col">
+                    <div className="relative z-10 w-full max-w-3xl bg-white dark:bg-[#09090b] rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-divider">
+                        <form onSubmit={handleSubmit} className="flex flex-col">
                             {/* Header Mejorado */}
                             <div className="flex items-start justify-between p-6 sm:p-8 border-b border-divider/50 bg-gradient-to-br from-primary/5 via-secondary/5 to-transparent shrink-0">
                                 <div className="flex-1">
@@ -337,11 +253,11 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                                             <Tag className="h-6 w-6 text-primary" />
                                         </div>
                                         <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                                            Nueva Categoría
+                                            {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
                                         </h2>
                                     </div>
                                     <p className="text-sm sm:text-base text-default-600 ml-[52px]">
-                                        Completa la información para crear una nueva categoría
+                                        {editingCategory ? 'Modifica la información de la categoría' : 'Completa la información para crear una nueva categoría'}
                                     </p>
                                 </div>
                                 <Button
@@ -412,6 +328,43 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                                             description="Ayuda a identificar el tipo de productos que incluye esta categoría"
                                         />
                                     </div>
+
+                                    {/* Estado (Solo en edición) */}
+                                    {editingCategory && (
+                                        <>
+                                            <div className="border-t border-divider/30" />
+                                            <div className="space-y-3">
+                                                <label className="text-base font-semibold text-foreground block">
+                                                    Estado
+                                                </label>
+                                                <div className="flex items-center gap-3 p-4 rounded-xl bg-default-100 dark:bg-default-50/10">
+                                                    <HeadlessSwitch
+                                                        checked={data.is_active}
+                                                        onChange={(value) => setData('is_active', value)}
+                                                        className={`${
+                                                            data.is_active ? 'bg-green-500' : 'bg-default-200'
+                                                        } relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
+                                                    >
+                                                        <span
+                                                            className={`${
+                                                                data.is_active ? 'translate-x-6' : 'translate-x-1'
+                                                            } inline-block h-5 w-5 transform rounded-full bg-white transition-transform`}
+                                                        />
+                                                    </HeadlessSwitch>
+                                                    <div>
+                                                        <p className={`text-sm font-medium ${data.is_active ? 'text-green-600' : 'text-default-500'}`}>
+                                                            Categoría {data.is_active ? 'Activa' : 'Inactiva'}
+                                                        </p>
+                                                        <p className="text-xs text-default-500">
+                                                            {data.is_active 
+                                                                ? 'Visible en el sistema' 
+                                                                : 'Oculta en el sistema'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 

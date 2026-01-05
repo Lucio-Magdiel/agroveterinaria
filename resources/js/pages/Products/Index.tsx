@@ -5,9 +5,11 @@ import {
     CardBody,
     CardHeader,
     Button,
-    Switch,
     Chip,
+    Input,
     Pagination,
+    Select,
+    SelectItem,
     Table,
     TableHeader,
     TableColumn,
@@ -24,6 +26,8 @@ import {
     AlertCircle,
     Calendar,
     X,
+    CheckCircle,
+    XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -153,9 +157,8 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
     };
 
     return (
-        <>
-            <AppLayout>
-                <Head title="Productos" />
+        <AppLayout>
+            <Head title="Productos" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
@@ -167,48 +170,65 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                     </div>
                     <Button
                         color="primary"
-                        startContent={<Plus className="h-4 w-4" />}
+                        startContent={<Plus className="h-5 w-5" />}
                         onPress={() => openModal()}
+                        size="lg"
+                        className="shadow-lg rounded-2xl font-semibold"
                     >
                         Nuevo Producto
                     </Button>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <div className="flex w-full flex-col gap-2 md:flex-row">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-default-400" />
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardHeader className="pb-4 px-6 pt-6">
+                        <div className="grid w-full gap-4 md:grid-cols-3">
+                            <div className="flex flex-col gap-2 md:col-span-2">
+                                <span className="text-sm font-semibold text-default-700 dark:text-default-200">Buscar producto</span>
                                 <input
                                     type="text"
-                                    placeholder="Buscar por nombre o SKU..."
+                                    placeholder="Nombre o SKU"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    onKeyPress={(e) =>
-                                        e.key === 'Enter' && handleSearch()
-                                    }
-                                    className="w-full rounded-xl border-2 border-default-300/40 bg-transparent py-2 pl-10 pr-4 text-foreground outline-none transition-all duration-200 placeholder:text-default-400 hover:border-default-400/60 focus:border-primary/70 dark:border-default-600/40 dark:hover:border-default-500/60 dark:focus:border-primary/70"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-transparent transition-all duration-200 outline-none text-foreground placeholder:text-default-400"
                                 />
                             </div>
-                            <select
-                                value={categoryFilter}
-                                onChange={(e) => setCategoryFilter(e.target.value)}
-                                className="w-full rounded-xl border-2 border-default-300/40 bg-white px-4 py-2 text-foreground outline-none transition-all duration-200 hover:border-default-400/60 focus:border-primary/70 dark:border-default-600/40 dark:bg-gray-900 dark:hover:border-default-500/60 dark:focus:border-primary/70 md:w-64 [&>option]:rounded-lg [&>option]:bg-white [&>option]:text-foreground [&>option]:dark:bg-gray-900"
-                            >
-                                <option value="">Todas las categorías</option>
-                                {categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <Button color="primary" onPress={handleSearch}>
-                                Buscar
-                            </Button>
+
+                            <div className="flex flex-col gap-2">
+                                <span className="text-sm font-semibold text-default-700 dark:text-default-200">Categoría</span>
+                                <select
+                                    value={categoryFilter}
+                                    onChange={(e) => setCategoryFilter(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-white dark:bg-[#09090b] transition-all duration-200 outline-none text-foreground [&>option]:bg-white [&>option]:dark:bg-[#09090b] [&>option]:text-foreground [&>option]:rounded-lg [&>option]:my-1 [&>option]:px-2"
+                                >
+                                    <option value="">Todas las categorías</option>
+                                    {categories.map((category) => (
+                                        <option key={category.id} value={category.id.toString()}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <Button 
+                                    color="primary" 
+                                    onPress={handleSearch}
+                                    size="lg"
+                                    className="w-full rounded-2xl font-semibold px-8"
+                                >
+                                    Buscar
+                                </Button>
+                            </div>
                         </div>
                     </CardHeader>
-                    <CardBody>
-                        <Table aria-label="Tabla de productos">
+                    <CardBody className="pt-2">
+                        <Table 
+                            aria-label="Tabla de productos"
+                            className="min-w-full"
+                            classNames={{
+                                wrapper: "rounded-2xl shadow-none",
+                                th: "bg-default-100 text-default-700 font-bold",
+                                td: "py-4"
+                            }}
+                        >
                             <TableHeader>
                                 <TableColumn>PRODUCTO</TableColumn>
                                 <TableColumn>CATEGORÍA</TableColumn>
@@ -258,18 +278,22 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <Chip
+                                            <Button
                                                 size="sm"
-                                                color={
-                                                    product.is_active
-                                                        ? 'success'
-                                                        : 'default'
+                                                variant="flat"
+                                                color={product.is_active ? 'success' : 'danger'}
+                                                isDisabled
+                                                className={`rounded-lg font-semibold inline-flex items-center gap-2 cursor-default ${product.is_active ? 'text-green-600' : 'text-red-600'}`}
+                                                startContent={
+                                                    product.is_active ? (
+                                                        <CheckCircle className="h-4 w-4" />
+                                                    ) : (
+                                                        <XCircle className="h-4 w-4" />
+                                                    )
                                                 }
                                             >
-                                                {product.is_active
-                                                    ? 'Activo'
-                                                    : 'Inactivo'}
-                                            </Chip>
+                                                {product.is_active ? 'Activo' : 'Inactivo'}
+                                            </Button>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-1">
@@ -316,8 +340,6 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                 </Card>
             </div>
 
-            </AppLayout>
-
             {/* Modal Overlay Personalizado */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -328,10 +350,10 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                     />
                     
                     {/* Modal Content */}
-                    <div className="relative z-10 w-full max-w-5xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto border border-divider">
+                    <div className="relative z-10 w-full max-w-5xl bg-white dark:bg-[#09090b] rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto border border-divider">
                         <form onSubmit={handleSubmit} className="flex flex-col">
                             {/* Header */}
-                            <div className="flex items-center justify-between p-6 border-b border-divider bg-gradient-to-r from-primary/10 to-secondary/10 sticky top-0 z-10 bg-white dark:bg-gray-900">
+                            <div className="flex items-center justify-between p-6 border-b border-divider bg-gradient-to-r from-primary/10 to-secondary/10 sticky top-0 z-10 bg-white dark:bg-[#09090b]">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2.5 bg-primary rounded-xl">
                                         <Package className="h-6 w-6 text-primary-foreground" />
@@ -357,7 +379,7 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                             </div>
 
                             {/* Body */}
-                            <div className="p-8 space-y-8 bg-white dark:bg-gray-900">
+                            <div className="p-8 space-y-8 bg-white dark:bg-[#09090b]">
                                 {/* Información Básica */}
                                 <div className="space-y-6">
                                     <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -436,7 +458,7 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                             value={data.category_id}
                                             onChange={(e) => setData('category_id', e.target.value)}
                                             required
-                                            className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-white dark:bg-gray-900 transition-all duration-200 outline-none text-foreground [&>option]:bg-white [&>option]:dark:bg-gray-900 [&>option]:text-foreground [&>option]:rounded-lg [&>option]:my-1 [&>option]:px-2"
+                                            className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-white dark:bg-[#09090b] transition-all duration-200 outline-none text-foreground [&>option]:bg-white [&>option]:dark:bg-[#09090b] [&>option]:text-foreground [&>option]:rounded-lg [&>option]:my-1 [&>option]:px-2"
                                         >
                                             <option value="">Selecciona una categoría</option>
                                             {categories.map((cat) => (
@@ -476,7 +498,7 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                                 />
                                             </div>
                                             {errors.purchase_price && <p className="text-xs text-danger">{errors.purchase_price}</p>}
-                                            <p className="text-xs text-default-400">Precio al que compras</p>
+                                            <p className="text-xs text-default-400">Costo unitario</p>
                                         </div>
 
                                         <div className="space-y-2">
@@ -499,13 +521,21 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                             <p className="text-xs text-default-400">Precio al que vendes</p>
                                         </div>
                                     </div>
-                                    {data.purchase_price && data.sale_price && parseFloat(data.sale_price) > parseFloat(data.purchase_price) && (
-                                        <div className="p-4 rounded-xl bg-success/10 border border-success/20">
-                                            <p className="text-sm text-success-700 dark:text-success-300">
-                                                <span className="font-semibold">Margen:</span> S/ {(parseFloat(data.sale_price) - parseFloat(data.purchase_price)).toFixed(2)} ({(((parseFloat(data.sale_price) - parseFloat(data.purchase_price)) / parseFloat(data.purchase_price)) * 100).toFixed(1)}%)
-                                            </p>
-                                        </div>
-                                    )}
+                                    {(() => {
+                                        const cost = parseFloat(data.purchase_price || '');
+                                        const price = parseFloat(data.sale_price || '');
+                                        const isValid = Number.isFinite(cost) && Number.isFinite(price) && cost > 0 && price >= 0;
+                                        if (!isValid || price < cost) return null;
+                                        const diff = price - cost;
+                                        const pct = (diff / cost) * 100;
+                                        return (
+                                            <div className="p-4 rounded-xl bg-success/10 border border-success/20">
+                                                <p className="text-sm text-success-700 dark:text-success-300">
+                                                    <span className="font-semibold">Margen:</span> S/ {diff.toFixed(2)} ({pct.toFixed(1)}%)
+                                                </p>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
 
                                 {/* Separador */}
@@ -568,32 +598,39 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                                 {/* Estado */}
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                                        <div className="h-1 w-1 rounded-full bg-secondary" />
+                                        <div className="h-1 w-1 rounded-full bg-success" />
                                         Estado del Producto
                                     </h3>
                                     <div className="flex items-center gap-3 p-4 rounded-xl bg-default-100">
-                                        <Switch
-                                            isSelected={data.is_active}
-                                            onValueChange={(value) => setData('is_active', value)}
-                                            size="lg"
-                                            color="success"
+                                        <input
+                                            type="checkbox"
+                                            checked={data.is_active}
+                                            onChange={(e) => setData('is_active', e.target.checked)}
+                                            className="w-5 h-5 rounded"
                                         />
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                Producto {data.is_active ? 'Activo' : 'Inactivo'}
-                                            </p>
-                                            <p className="text-xs text-default-500">
-                                                {data.is_active 
-                                                    ? 'Este producto estará visible y disponible para ventas' 
-                                                    : 'Este producto estará oculto y no se podrá vender'}
-                                            </p>
+                                        <div className="flex items-center gap-2">
+                                            {data.is_active ? (
+                                                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                            ) : (
+                                                <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                            )}
+                                            <div>
+                                                <p className={`text-sm font-medium ${data.is_active ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                    Producto {data.is_active ? 'Activo' : 'Inactivo'}
+                                                </p>
+                                                <p className="text-xs text-default-500">
+                                                    {data.is_active 
+                                                        ? 'Este producto estará visible y disponible para ventas' 
+                                                        : 'Este producto estará oculto y no se podrá vender'}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Footer */}
-                            <div className="flex items-center justify-end gap-3 p-6 border-t border-divider bg-default-50 dark:bg-gray-800 sticky bottom-0">
+                            <div className="flex items-center justify-end gap-3 p-6 border-t border-divider bg-default-50 dark:bg-[#18181b] sticky bottom-0">
                                 <Button
                                     variant="flat"
                                     onPress={closeModal}
@@ -617,7 +654,7 @@ export default function ProductsIndex({ products, categories, filters }: Props) 
                     </div>
                 </div>
             )}
-        </>
+        </AppLayout>
     );
 }
 

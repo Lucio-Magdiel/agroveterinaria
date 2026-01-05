@@ -42,6 +42,11 @@ const mainNavItems: NavItem[] = [
         icon: Package,
     },
     {
+        title: 'Inventario',
+        href: '/inventory',
+        icon: Folder,
+    },
+    {
         title: 'Ventas',
         href: '/sales',
         icon: ShoppingCart,

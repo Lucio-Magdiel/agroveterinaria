@@ -86,26 +86,32 @@ export default function ReportsProducts({
                 </div>
 
                 {/* Filtros */}
-                <Card>
-                    <CardBody>
-                        <div className="flex flex-wrap items-end gap-3">
-                            <Input
-                                type="date"
-                                label="Fecha Desde"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                className="w-full md:w-auto"
-                            />
-                            <Input
-                                type="date"
-                                label="Fecha Hasta"
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                className="w-full md:w-auto"
-                            />
-                            <Button color="primary" onPress={handleFilter}>
-                                Aplicar Filtros
-                            </Button>
+                <Card className="shadow-2xl rounded-3xl dark:bg-[#18181b] border-none">
+                    <CardBody className="px-6 py-6">
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Fecha Desde</label>
+                                <input
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    className="px-3 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 focus:outline-none focus:border-primary/70 transition-colors"
+                                />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-default-700 dark:text-default-200">Fecha Hasta</label>
+                                <input
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={(e) => setDateTo(e.target.value)}
+                                    className="px-3 py-3 border-2 border-default-300/40 rounded-xl bg-white dark:bg-[#18181b] text-default-700 dark:text-default-200 focus:outline-none focus:border-primary/70 transition-colors"
+                                />
+                            </div>
+                            <div className="flex items-end">
+                                <Button color="primary" onPress={handleFilter} size="lg" className="w-full rounded-2xl font-semibold">
+                                    Aplicar Filtros
+                                </Button>
+                            </div>
                         </div>
                     </CardBody>
                 </Card>
