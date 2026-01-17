@@ -1,5 +1,8 @@
 [phases.setup]
 nixPkgs = ['php83', 'php83Extensions.pdo', 'php83Extensions.pdo_mysql', 'php83Extensions.mbstring', 'php83Extensions.dom', 'php83Extensions.curl', 'php83Extensions.gd', 'php83Extensions.zip', 'php83Extensions.intl', 'php83Extensions.xml', 'php83Extensions.bcmath']
 
+[phases.build]
+cmds = ['php artisan migrate --force']
+
 [start]
 cmd = 'php artisan serve --host=0.0.0.0 --port=$PORT'
