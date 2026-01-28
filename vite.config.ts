@@ -1,4 +1,4 @@
-import { wayfinder } from '@laravel/vite-plugin-wayfinder';
+// import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
@@ -17,10 +17,8 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        // Desactivar wayfinder en Railway/producción (no hay DB disponible durante build)
-        ...(process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production' ? [] : [wayfinder({
-            formVariants: true,
-        })]),
+        // Wayfinder desactivado temporalmente para despliegue en Railway
+        // Requiere DB disponible durante build, lo cual no es el caso en Railway
     ],
     esbuild: {
         jsx: 'automatic',
