@@ -13,9 +13,8 @@ class DashboardService
     {
         $today = today();
         
-        // Ventas completadas de hoy
-        $todaySalesQuery = Sale::whereDate('created_at', $today)
-            ->where('status', 'completed');
+        // Ventas de hoy
+        $todaySalesQuery = Sale::whereDate('created_at', $today);
 
         $todayRevenue = $todaySalesQuery->sum('total');
         $todaySalesCount = $todaySalesQuery->count();
@@ -33,7 +32,6 @@ class DashboardService
     {
         return Sale::with(['user', 'details.product'])
             ->whereDate('created_at', today())
-            ->where('status', 'completed')
             ->latest()
             ->take(5)
             ->get();
@@ -47,14 +45,7 @@ class DashboardService
                 ->with('category')
                 ->take(5)
                 ->get(),
-            'expiring' => Product::whereNotNull('expiration_date')
-                ->where('expiration_date', '<=', now()->addDays(30))
-                ->where('is_active', true)
-                ->with('category')
-                ->orderBy('expiration_date')
-                ->take(5)
-                ->get(),
-        ];
+            'expiring' => collect([]), // Temporalmente vacío hasta agregar campo expiration_date
     }
 
     protected function calculateRevenueChange($todayRevenue)
@@ -68,13 +59,11 @@ class DashboardService
             ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 2)
             : 0;
     }
-
-    protected function getTopProductToday($date)
+function getTopProductToday($date)
     {
         $topProduct = SaleDetail::whereHas('sale', function ($query) use ($date) {
                 $query->whereDate('created_at', $date)
                     ->where('status', 'completed');
-            })
             ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(subtotal) as total_sales'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
@@ -92,7 +81,6 @@ class DashboardService
     {
         return Sale::whereDate('created_at', $date)
             ->where('status', 'completed')
-            ->select('payment_method', DB::raw('COUNT(*) as count'), DB::raw('SUM(total) as total'))
             ->groupBy('payment_method')
             ->get();
     }
