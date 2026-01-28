@@ -17,9 +17,10 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
+        // Desactivar wayfinder en Railway/producción (no hay DB disponible durante build)
+        ...(process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production' ? [] : [wayfinder({
             formVariants: true,
-        }),
+        })]),
     ],
     esbuild: {
         jsx: 'automatic',
