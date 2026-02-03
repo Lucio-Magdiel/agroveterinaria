@@ -121,11 +121,11 @@ export default function UsersIndex({ users, roles }: Props) {
 
     const getRoleBadgeColor = (roleName: string): "danger" | "primary" | "success" | "default" => {
         switch (roleName) {
-            case 'admin':
+            case 'Administrador':
                 return 'danger';
-            case 'vendedor':
+            case 'Vendedor':
                 return 'primary';
-            case 'almacenero':
+            case 'Almacenero':
                 return 'success';
             default:
                 return 'default';
@@ -144,20 +144,11 @@ export default function UsersIndex({ users, roles }: Props) {
 
     // Función para obtener el nombre en español del rol
     const getRoleDisplayName = (roleName: string) => {
-        switch (roleName) {
-            case 'admin':
-                return 'Administrador';
-            case 'vendedor':
-                return 'Vendedor';
-            case 'almacenero':
-                return 'Almacenero';
-            default:
-                return roleName;
-        }
+        return roleName;
     };
 
     // Orden de roles para mostrar
-    const roleOrder = ['admin', 'vendedor', 'almacenero', 'sin-rol'];
+    const roleOrder = ['Administrador', 'Vendedor', 'Almacenero', 'sin-rol'];
     const sortedRoles = Object.keys(usersByRole).sort((a, b) => {
         return roleOrder.indexOf(a) - roleOrder.indexOf(b);
     });
@@ -165,7 +156,7 @@ export default function UsersIndex({ users, roles }: Props) {
     // Función para obtener el título y color de la sección
     const getRoleSection = (roleName: string) => {
         switch (roleName) {
-            case 'admin':
+            case 'Administrador':
                 return { 
                     title: 'Administradores', 
                     icon: Shield, 
@@ -173,7 +164,7 @@ export default function UsersIndex({ users, roles }: Props) {
                     bg: 'bg-gradient-to-br from-red-100 to-red-50 dark:from-red-950/30 dark:to-red-900/20',
                     borderColor: 'border-red-200 dark:border-red-800/30'
                 };
-            case 'vendedor':
+            case 'Vendedor':
                 return { 
                     title: 'Vendedores', 
                     icon: UserIcon, 
@@ -181,7 +172,7 @@ export default function UsersIndex({ users, roles }: Props) {
                     bg: 'bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-950/30 dark:to-blue-900/20',
                     borderColor: 'border-blue-200 dark:border-blue-800/30'
                 };
-            case 'almacenero':
+            case 'Almacenero':
                 return { 
                     title: 'Almaceneros', 
                     icon: UserIcon, 
@@ -271,11 +262,11 @@ export default function UsersIndex({ users, roles }: Props) {
                                                             color={getRoleBadgeColor(userRoleName)}
                                                             startContent={<Shield className="h-3.5 w-3.5" />}
                                                             className={`mt-1 rounded-lg w-fit font-semibold ${
-                                                                userRoleName === 'admin'
+                                                                userRoleName === 'Administrador'
                                                                     ? 'text-red-600 bg-red-100 dark:bg-red-950/50'
-                                                                    : userRoleName === 'vendedor'
+                                                                    : userRoleName === 'Vendedor'
                                                                     ? 'text-blue-600 bg-blue-100 dark:bg-blue-950/50'
-                                                                    : userRoleName === 'almacenero'
+                                                                    : userRoleName === 'Almacenero'
                                                                     ? 'text-green-600 bg-green-100 dark:bg-green-950/50'
                                                                     : 'text-gray-600 bg-gray-100 dark:bg-gray-950/50'
                                                             }`}

@@ -43,7 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('inventory/movements', [InventoryMovementController::class, 'store'])->name('inventory.store');
 
     // Gestión de usuarios (solo admin)
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:Administrador')->group(function () {
         Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
     });
 });

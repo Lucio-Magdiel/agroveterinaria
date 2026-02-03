@@ -73,7 +73,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<any>().props;
-    const isAdmin = auth?.user?.roles?.some((role: any) => role.name === 'admin');
+    const isAdmin = auth?.user?.roles?.some((role: any) => role.name === 'Administrador');
 
     // Agregar item de usuarios si es admin
     const navItems = [...mainNavItems];
