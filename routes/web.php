@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\InventoryMovementController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -40,6 +41,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Movimientos de inventario
     Route::get('inventory', [InventoryMovementController::class, 'index'])->name('inventory.index');
     Route::post('inventory/movements', [InventoryMovementController::class, 'store'])->name('inventory.store');
+
+    // Gestión de usuarios (solo admin)
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
+    });
 });
 
 require __DIR__.'/settings.php';

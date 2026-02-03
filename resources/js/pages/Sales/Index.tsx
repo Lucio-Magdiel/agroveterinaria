@@ -28,6 +28,16 @@ interface Sale {
     payment_method: string;
     status: string;
     created_at: string;
+    details: Array<{
+        id: number;
+        product: {
+            name: string;
+            sku: string;
+        };
+        quantity: number;
+        unit_price: number;
+        subtotal: number;
+    }>;
 }
 
 interface Props {
@@ -168,6 +178,7 @@ export default function SalesIndex({ sales, filters }: Props) {
                             <TableHeader>
                                 <TableColumn>N° VENTA</TableColumn>
                                 <TableColumn>VENDEDOR</TableColumn>
+                                <TableColumn>PRODUCTOS</TableColumn>
                                 <TableColumn>TOTAL</TableColumn>
                                 <TableColumn>PAGO</TableColumn>
                                 <TableColumn>FECHA</TableColumn>
@@ -186,6 +197,25 @@ export default function SalesIndex({ sales, filters }: Props) {
                                             <span className="text-sm">
                                                 {sale.user.name}
                                             </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col gap-1">
+                                                {sale.details.slice(0, 2).map((detail) => (
+                                                    <div key={detail.id} className="flex items-center gap-2 text-xs">
+                                                        <Chip size="sm" variant="flat" className="rounded-lg">
+                                                            {detail.quantity}x
+                                                        </Chip>
+                                                        <span className="text-default-600 line-clamp-1">
+                                                            {detail.product.name}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {sale.details.length > 2 && (
+                                                    <span className="text-xs text-default-400 italic">
+                                                        +{sale.details.length - 2} más
+                                                    </span>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <span className="font-semibold text-primary">

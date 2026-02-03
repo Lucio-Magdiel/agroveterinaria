@@ -46,6 +46,7 @@ class DashboardService
                 ->take(5)
                 ->get(),
             'expiring' => collect([]), // Temporalmente vacío hasta agregar campo expiration_date
+        ];
     }
 
     protected function calculateRevenueChange($todayRevenue)
@@ -59,11 +60,12 @@ class DashboardService
             ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 2)
             : 0;
     }
-function getTopProductToday($date)
+    protected function getTopProductToday($date)
     {
         $topProduct = SaleDetail::whereHas('sale', function ($query) use ($date) {
                 $query->whereDate('created_at', $date)
                     ->where('status', 'completed');
+            })
             ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(subtotal) as total_sales'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')

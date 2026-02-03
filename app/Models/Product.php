@@ -15,9 +15,12 @@ class Product extends Model
         'category_id',
         'purchase_price',
         'sale_price',
+        'price_per_kg',
         'stock',
         'min_stock',
         'unit',
+        'kg_per_unit',
+        'allow_fractional_sale',
         'expiration_date',
         'image',
         'is_active',
@@ -28,8 +31,11 @@ class Product extends Model
         return [
             'purchase_price' => 'decimal:2',
             'sale_price' => 'decimal:2',
-            'stock' => 'integer',
-            'min_stock' => 'integer',
+            'price_per_kg' => 'decimal:2',
+            'stock' => 'decimal:2',
+            'min_stock' => 'decimal:2',
+            'kg_per_unit' => 'decimal:2',
+            'allow_fractional_sale' => 'boolean',
             'expiration_date' => 'date',
             'is_active' => 'boolean',
         ];
@@ -53,5 +59,21 @@ class Product extends Model
     public function isLowStock(): bool
     {
         return $this->stock <= $this->min_stock;
+    }
+
+    public function getAvailableKgAttribute(): float
+    {
+        if ($this->kg_per_unit && $this->kg_per_unit > 0) {
+            return $this->stock * $this->kg_per_unit;
+        }
+        return $this->stock;
+    }
+
+    public function getStockDisplayAttribute(): string
+    {
+        if ($this->allow_fractional_sale && $this->kg_per_unit) {
+            return "{$this->stock} {$this->unit} ({$this->available_kg} kg disponibles)";
+        }
+        return "{$this->stock} {$this->unit}";
     }
 }

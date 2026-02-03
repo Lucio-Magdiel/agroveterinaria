@@ -50,6 +50,7 @@ interface CartItem {
     quantity: number;
     unit_price: number;
     stock: number;
+    unit: string;
 }
 
 interface Props {
@@ -85,6 +86,8 @@ export default function SalesCreate({ products }: Props) {
             (item) => item.product_id === product.id
         );
 
+        const increment = product.unit === 'kg' || product.unit === 'litro' ? 0.5 : 1;
+
         if (existingItem) {
             if (existingItem.quantity >= product.stock) {
                 alert('No hay suficiente stock');
@@ -93,7 +96,7 @@ export default function SalesCreate({ products }: Props) {
             setCart(
                 cart.map((item) =>
                     item.product_id === product.id
-                        ? { ...item, quantity: item.quantity + 1 }
+                        ? { ...item, quantity: item.quantity + increment }
                         : item
                 )
             );
@@ -107,9 +110,10 @@ export default function SalesCreate({ products }: Props) {
                 {
                     product_id: product.id,
                     name: product.name,
-                    quantity: 1,
+                    quantity: increment,
                     unit_price: product.sale_price,
                     stock: product.stock,
+                    unit: product.unit,
                 },
             ]);
         }
@@ -332,24 +336,30 @@ export default function SalesCreate({ products }: Props) {
                                                             )}
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Input
-                                                                type="number"
-                                                                min="1"
-                                                                max={item.stock}
-                                                                value={item.quantity.toString()}
-                                                                onChange={(e) =>
-                                                                    updateQuantity(
-                                                                        item.product_id,
-                                                                        parseInt(
-                                                                            e
-                                                                                .target
-                                                                                .value
+                                                            <div className="flex items-center gap-2">
+                                                                <Input
+                                                                    type="number"
+                                                                    min="0.01"
+                                                                    step={item.unit === 'kg' || item.unit === 'litro' ? '0.5' : '1'}
+                                                                    max={item.stock}
+                                                                    value={item.quantity.toString()}
+                                                                    onChange={(e) =>
+                                                                        updateQuantity(
+                                                                            item.product_id,
+                                                                            parseFloat(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            )
                                                                         )
-                                                                    )
-                                                                }
-                                                                className="w-20"
-                                                                size="sm"
-                                                            />
+                                                                    }
+                                                                    className="w-24"
+                                                                    size="sm"
+                                                                />
+                                                                <span className="text-xs text-default-500 whitespace-nowrap">
+                                                                    {item.unit}
+                                                                </span>
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell className="font-semibold">
                                                             {formatCurrency(

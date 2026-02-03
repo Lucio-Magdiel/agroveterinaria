@@ -44,14 +44,19 @@ interface Product {
     id: number;
     sku: string;
     name: string;
+    description: string | null;
     category: { name: string };
     purchase_price: number;
     sale_price: number;
+    price_per_kg: number | null;
     stock: number;
     min_stock: number;
     unit: string;
-    is_active: boolean;
+    kg_per_unit: number | null;
+    allow_fractional_sale: boolean;
     expiration_date: string | null;
+    image: string | null;
+    is_active: boolean;
 }
 
 interface Props {
@@ -76,9 +81,12 @@ export default function CategoryShow({ category, products }: Props) {
         category_id: category.id.toString(),
         purchase_price: '',
         sale_price: '',
+        price_per_kg: '',
         stock: '0',
         min_stock: '0',
         unit: 'unidad',
+        kg_per_unit: '',
+        allow_fractional_sale: false,
         expiration_date: '',
         is_active: true,
         stay_on_category: true,
@@ -104,17 +112,21 @@ export default function CategoryShow({ category, products }: Props) {
 
     const openModal = (product?: Product) => {
         if (product) {
+            console.log('Product data:', product); // Debug
             setEditingProduct(product);
             setData({
                 sku: product.sku,
                 name: product.name,
-                description: '',
+                description: product.description || '',
                 category_id: category.id.toString(),
                 purchase_price: product.purchase_price.toString(),
                 sale_price: product.sale_price.toString(),
+                price_per_kg: product.price_per_kg?.toString() || '',
                 stock: product.stock.toString(),
                 min_stock: product.min_stock.toString(),
                 unit: product.unit,
+                kg_per_unit: product.kg_per_unit?.toString() || '',
+                allow_fractional_sale: product.allow_fractional_sale,
                 expiration_date: product.expiration_date || '',
                 is_active: product.is_active,
                 stay_on_category: true,
@@ -690,6 +702,82 @@ export default function CategoryShow({ category, products }: Props) {
                                             />
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Separador */}
+                                <div className="border-t border-divider" />
+
+                                {/* Venta Fraccionada */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                                        <div className="h-1 w-1 rounded-full bg-secondary" />
+                                        Venta Fraccionada
+                                    </h3>
+                                    <div className="grid gap-4 md:grid-cols-3">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-default-700 dark:text-default-300 block">
+                                                Kilogramos por {data.unit || 'unidad'}
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="Ej: 9 para bolsa de 9kg"
+                                                value={data.kg_per_unit}
+                                                onChange={(e) => setData('kg_per_unit', e.target.value)}
+                                                className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-transparent transition-all duration-200 outline-none text-foreground placeholder:text-default-400"
+                                            />
+                                            {errors.kg_per_unit && <p className="text-xs text-danger">{errors.kg_per_unit}</p>}
+                                            <p className="text-xs text-default-400">Opcional - Para productos que se pueden vender por peso</p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-default-700 dark:text-default-300 block">
+                                                Precio por kilogramo
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-default-500">S/</span>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    value={data.price_per_kg}
+                                                    onChange={(e) => setData('price_per_kg', e.target.value)}
+                                                    className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-transparent transition-all duration-200 outline-none text-foreground placeholder:text-default-400"
+                                                />
+                                            </div>
+                                            {errors.price_per_kg && <p className="text-xs text-danger">{errors.price_per_kg}</p>}
+                                            <p className="text-xs text-default-400">Precio al vender por kilo</p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-default-700 dark:text-default-300 block">
+                                                Permitir venta fraccionada
+                                            </label>
+                                            <div className="flex items-center gap-3 p-4 rounded-xl bg-default-100 border-2 border-default-300/40 dark:border-default-600/40">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={data.allow_fractional_sale}
+                                                    onChange={(e) => setData('allow_fractional_sale', e.target.checked)}
+                                                    className="w-5 h-5 rounded"
+                                                />
+                                                <div>
+                                                    <p className="text-sm font-medium text-default-700 dark:text-default-300">
+                                                        Vender por kilos
+                                                    </p>
+                                                    <p className="text-xs text-default-500">
+                                                        Permite vender cantidades fraccionadas en kilos
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {data.kg_per_unit && data.stock && (
+                                        <div className="p-4 rounded-xl bg-secondary/10 border border-secondary/20">
+                                            <p className="text-sm text-secondary-700 dark:text-secondary-300">
+                                                <span className="font-semibold">Disponible:</span> {data.stock} {data.unit}s = {(parseFloat(data.stock) * parseFloat(data.kg_per_unit)).toFixed(2)} kg
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Separador */}

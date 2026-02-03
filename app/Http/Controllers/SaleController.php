@@ -15,7 +15,7 @@ class SaleController extends Controller
     public function index(Request $request)
     {
         $sales = Sale::query()
-            ->with(['user', 'details'])
+            ->with(['user', 'details.product'])
             ->when($request->search, function ($query, $search) {
                 $query->where('sale_number', 'like', "%{$search}%");
             })
@@ -61,7 +61,7 @@ class SaleController extends Controller
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { 
     BookOpen, 
     Folder, 
@@ -72,6 +72,19 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<any>().props;
+    const isAdmin = auth?.user?.roles?.some((role: any) => role.name === 'admin');
+
+    // Agregar item de usuarios si es admin
+    const navItems = [...mainNavItems];
+    if (isAdmin) {
+        navItems.push({
+            title: 'Usuarios',
+            href: '/users',
+            icon: Users,
+        });
+    }
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -87,7 +100,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>

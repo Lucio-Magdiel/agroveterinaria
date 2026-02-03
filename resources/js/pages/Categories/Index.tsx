@@ -273,68 +273,50 @@ export default function CategoriesIndex({ categories, filters }: Props) {
 
                             {/* Body con scroll */}
                             <div className="overflow-y-auto flex-1">
-                                <div className="p-6 sm:p-8 space-y-8">
+                                <div className="p-8 space-y-6">
                                     {/* Campo Nombre */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2">
-                                            <label className="text-base font-semibold text-foreground">
-                                                Nombre de la Categoría
-                                            </label>
-                                            <span className="text-danger text-lg">*</span>
-                                        </div>
-                                        <Input
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-default-700 dark:text-default-300 block">
+                                            Nombre de la Categoría <span className="text-danger">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
                                             placeholder="Ej: Alimentos para Animales, Medicamentos, Accesorios..."
                                             value={data.name}
                                             onChange={(e) => setData('name', e.target.value)}
-                                            isInvalid={!!errors.name}
-                                            errorMessage={errors.name}
-                                            isRequired
+                                            required
                                             autoFocus
-                                            size="lg"
-                                            variant="bordered"
-                                            classNames={{
-                                                inputWrapper: "rounded-xl border-2 hover:border-primary/50 focus-within:border-primary group-data-[invalid=true]:border-danger",
-                                                input: "text-base"
-                                            }}
-                                            description="Nombre descriptivo que identifique claramente el tipo de productos"
+                                            className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-transparent transition-all duration-200 outline-none text-foreground placeholder:text-default-400"
                                         />
+                                        {errors.name && <p className="text-xs text-danger">{errors.name}</p>}
+                                        <p className="text-xs text-default-500">Nombre descriptivo que identifique claramente el tipo de productos</p>
                                     </div>
 
                                     {/* Separador visual */}
                                     <div className="border-t border-divider/30" />
 
                                     {/* Campo Descripción */}
-                                    <div className="space-y-3">
-                                        <label className="text-base font-semibold text-foreground block">
-                                            Descripción
-                                            <span className="text-sm font-normal text-default-500 ml-2">(Opcional)</span>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-default-700 dark:text-default-300 block">
+                                            Descripción <span className="text-sm font-normal text-default-500">(Opcional)</span>
                                         </label>
-                                        <Textarea
+                                        <textarea
                                             placeholder="Describe el tipo de productos que incluye esta categoría, sus características principales o cualquier información relevante..."
                                             value={data.description}
                                             onChange={(e) => setData('description', e.target.value)}
-                                            isInvalid={!!errors.description}
-                                            errorMessage={errors.description}
-                                            minRows={4}
-                                            maxRows={6}
-                                            size="lg"
-                                            variant="bordered"
-                                            classNames={{
-                                                inputWrapper: "rounded-xl border-2 hover:border-primary/50 focus-within:border-primary data-[hover=true]:border-primary/50 shadow-none bg-transparent",
-                                                input: "text-base resize-none bg-transparent",
-                                                innerWrapper: "bg-transparent"
-                                            }}
-                                            disableAnimation
-                                            description="Ayuda a identificar el tipo de productos que incluye esta categoría"
+                                            rows={4}
+                                            className="w-full px-4 py-3 rounded-xl border-2 border-default-300/40 dark:border-default-600/40 hover:border-default-400/60 dark:hover:border-default-500/60 focus:border-primary/70 dark:focus:border-primary/70 bg-transparent transition-all duration-200 outline-none text-foreground placeholder:text-default-400 resize-none"
                                         />
+                                        {errors.description && <p className="text-xs text-danger">{errors.description}</p>}
+                                        <p className="text-xs text-default-500">Ayuda a identificar el tipo de productos que incluye esta categoría</p>
                                     </div>
 
                                     {/* Estado (Solo en edición) */}
                                     {editingCategory && (
                                         <>
                                             <div className="border-t border-divider/30" />
-                                            <div className="space-y-3">
-                                                <label className="text-base font-semibold text-foreground block">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-semibold text-default-700 dark:text-default-300 block">
                                                     Estado
                                                 </label>
                                                 <div className="flex items-center gap-3 p-4 rounded-xl bg-default-100 dark:bg-default-50/10">
@@ -369,12 +351,13 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                             </div>
 
                             {/* Footer Mejorado */}
-                            <div className="flex items-center justify-end gap-3 p-6 sm:p-8 border-t border-divider/50 bg-default-50/50 shrink-0">
+                            <div className="flex items-center justify-end gap-3 p-6 sm:p-8 border-t border-divider/50 bg-default-50/50 dark:bg-[#18181b] shrink-0">
                                 <Button
                                     variant="flat"
                                     onPress={closeModal}
                                     isDisabled={processing}
                                     size="lg"
+                                    type="button"
                                     className="rounded-xl font-medium px-6 hover:bg-default-200"
                                 >
                                     Cancelar
@@ -386,7 +369,7 @@ export default function CategoriesIndex({ categories, filters }: Props) {
                                     size="lg"
                                     className="rounded-xl font-semibold px-8 shadow-lg shadow-primary/20"
                                 >
-                                    Crear Categoría
+                                    {editingCategory ? 'Guardar Cambios' : 'Crear Categoría'}
                                 </Button>
                             </div>
                         </form>

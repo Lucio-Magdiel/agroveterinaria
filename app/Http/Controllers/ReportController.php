@@ -25,7 +25,7 @@ class ReportController extends Controller
         $sales = Sale::whereDate('created_at', '>=', $dateFrom)
             ->whereDate('created_at', '<=', $dateTo)
             ->where('status', 'completed')
-            ->with(['user'])
+            ->with(['user', 'details.product'])
             ->get();
 
         $totalRevenue = $sales->sum('total');

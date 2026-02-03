@@ -32,7 +32,25 @@ class CategoryController extends Controller
         $products = $category->products()
             ->with('category')
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->through(fn ($product) => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->name,
+                'description' => $product->description,
+                'category' => $product->category,
+                'purchase_price' => $product->purchase_price,
+                'sale_price' => $product->sale_price,
+                'price_per_kg' => $product->price_per_kg,
+                'stock' => $product->stock,
+                'min_stock' => $product->min_stock,
+                'unit' => $product->unit,
+                'kg_per_unit' => $product->kg_per_unit,
+                'allow_fractional_sale' => $product->allow_fractional_sale,
+                'expiration_date' => $product->expiration_date?->format('Y-m-d'),
+                'image' => $product->image,
+                'is_active' => $product->is_active,
+            ]);
 
         return Inertia::render('Categories/Show', [
             'category' => $category,

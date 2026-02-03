@@ -28,7 +28,25 @@ class ProductController extends Controller
             })
             ->latest()
             ->paginate(15)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn ($product) => [
+                'id' => $product->id,
+                'sku' => $product->sku,
+                'name' => $product->name,
+                'description' => $product->description,
+                'category' => $product->category,
+                'purchase_price' => $product->purchase_price,
+                'sale_price' => $product->sale_price,
+                'price_per_kg' => $product->price_per_kg,
+                'stock' => $product->stock,
+                'min_stock' => $product->min_stock,
+                'unit' => $product->unit,
+                'kg_per_unit' => $product->kg_per_unit,
+                'allow_fractional_sale' => $product->allow_fractional_sale,
+                'expiration_date' => $product->expiration_date?->format('Y-m-d'),
+                'image' => $product->image,
+                'is_active' => $product->is_active,
+            ]);
 
         $categories = Category::where('is_active', true)->get();
 
@@ -48,9 +66,12 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'purchase_price' => 'required|numeric|min:0',
             'sale_price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'min_stock' => 'required|integer|min:0',
+            'price_per_kg' => 'nullable|numeric|min:0',
+            'stock' => 'required|numeric|min:0',
+            'min_stock' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
+            'kg_per_unit' => 'nullable|numeric|min:0',
+            'allow_fractional_sale' => 'boolean',
             'expiration_date' => 'nullable|date',
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
@@ -60,7 +81,21 @@ class ProductController extends Controller
             $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        // Registrar movimiento de inventario si hay stock inicial
+        if ($product->stock > 0) {
+            \App\Models\InventoryMovement::create([
+                'product_id' => $product->id,
+                'type' => 'entry',
+                'quantity' => $product->stock,
+                'reason' => 'Stock inicial al crear producto',
+                'previous_stock' => 0,
+                'new_stock' => $product->stock,
+                'user_id' => auth()->id(),
+            ]);
+        }
+
         if ($request->boolean('stay_on_category') && $request->filled('category_id')) {
             return redirect()->route('categories.show', $request->input('category_id'))
                 ->with('success', 'Producto creado exitosamente.');
@@ -79,9 +114,12 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'purchase_price' => 'required|numeric|min:0',
             'sale_price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'min_stock' => 'required|integer|min:0',
+            'price_per_kg' => 'nullable|numeric|min:0',
+            'stock' => 'required|numeric|min:0',
+            'min_stock' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
+            'kg_per_unit' => 'nullable|numeric|min:0',
+            'allow_fractional_sale' => 'boolean',
             'expiration_date' => 'nullable|date',
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean',

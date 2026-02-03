@@ -32,7 +32,7 @@ interface ProductOption {
 interface Movement {
     id: number;
     product_id: number;
-    type: 'entry' | 'exit' | 'adjustment';
+    type: 'entry' | 'exit' | 'adjustment' | 'entrada' | 'salida' | 'ajuste';
     quantity: number;
     previous_stock: number;
     new_stock: number;
@@ -91,14 +91,20 @@ interface Props {
 
 const typeLabels: Record<string, string> = {
     entry: 'Entrada',
+    entrada: 'Entrada',
     exit: 'Salida',
+    salida: 'Salida',
     adjustment: 'Ajuste',
+    ajuste: 'Ajuste',
 };
 
 const typeColors: Record<string, 'success' | 'danger' | 'warning'> = {
     entry: 'success',
+    entrada: 'success',
     exit: 'danger',
+    salida: 'danger',
     adjustment: 'warning',
+    ajuste: 'warning',
 };
 
 export default function InventoryReport({ movements, products, summary, by_product, filters }: Props) {
@@ -373,8 +379,8 @@ export default function InventoryReport({ movements, products, summary, by_produ
                             <TableBody emptyContent="Sin movimientos">
                                 {movements.data.map((movement) => {
                                     const isLow = movement.new_stock <= movement.product.min_stock;
-                                    const isEntry = movement.type === 'entry';
-                                    const isExit = movement.type === 'exit';
+                                    const isEntry = movement.type === 'entry' || movement.type === 'entrada';
+                                    const isExit = movement.type === 'exit' || movement.type === 'salida';
                                     return (
                                         <TableRow key={movement.id}>
                                             <TableCell>{new Date(movement.created_at).toLocaleString()}</TableCell>
