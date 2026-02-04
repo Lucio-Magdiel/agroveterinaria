@@ -60,7 +60,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'sku' => 'required|string|unique:products,sku|max:255',
+            'sku' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
@@ -76,6 +76,13 @@ class ProductController extends Controller
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
         ]);
+
+        // Verificar si el SKU ya existe
+        if (Product::where('sku', $validated['sku'])->exists()) {
+            return back()->withErrors([
+                'sku' => 'El SKU ya existe. Por favor, usa un código diferente.'
+            ])->withInput();
+        }
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('products', 'public');
@@ -108,7 +115,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
+            'sku' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
@@ -124,6 +131,13 @@ class ProductController extends Controller
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
         ]);
+
+        // Verificar si el SKU ya existe en otro producto
+        if (Product::where('sku', $validated['sku'])->where('id', '!=', $product->id)->exists()) {
+            return back()->withErrors([
+                'sku' => 'El SKU ya existe. Por favor, usa un código diferente.'
+            ])->withInput();
+        }
 
         if ($request->hasFile('image')) {
             if ($product->image) {

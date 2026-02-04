@@ -20,7 +20,10 @@ class TestDataSeeder extends Seeder
         ];
 
         foreach ($categories as $categoryData) {
-            Category::create($categoryData);
+            Category::firstOrCreate(
+                ['name' => $categoryData['name']],
+                $categoryData
+            );
         }
 
         // Crear productos
@@ -38,7 +41,10 @@ class TestDataSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
-            Product::create($productData);
+            Product::firstOrCreate(
+                ['sku' => $productData['sku']],
+                $productData
+            );
         }
     }
 }
