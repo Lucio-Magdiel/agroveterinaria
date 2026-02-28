@@ -91,14 +91,8 @@ export default function SalesCreate({ products }: Props) {
         setSearchQuery('');
         setShowDropdown(false);
 
-        // Si el producto permite venta fraccionada y tiene todos los datos configurados, mostrar modal para que elija el tipo de venta
-        if (
-            product.allow_fractional_sale &&
-            product.price_per_kg !== null &&
-            product.price_per_kg !== undefined &&
-            product.kg_per_unit !== null &&
-            product.kg_per_unit !== undefined
-        ) {
+        // Si el producto permite venta fraccionada, mostrar modal para que elija el tipo de venta
+        if (product.allow_fractional_sale && product.price_per_kg && product.kg_per_unit) {
             setProductModalOpen(product);
         } else {
             // Si no, agregar directamente con venta normal
@@ -107,12 +101,6 @@ export default function SalesCreate({ products }: Props) {
     };
 
     const addToCart = (product: Product, isFractionalSale: boolean) => {
-        // Validación: si es venta fraccionada, asegurar que tenga precio_per_kg
-        if (isFractionalSale && (!product.price_per_kg || !product.kg_per_unit)) {
-            alert('Este producto no tiene configurados los datos para venta fraccionada');
-            return;
-        }
-
         const existingItem = cart.find(
             (item) => item.product_id === product.id
         );
@@ -399,7 +387,7 @@ export default function SalesCreate({ products }: Props) {
                                                                 <Input
                                                                     type="number"
                                                                     min="0.01"
-                                                                    step={item.isFractionalSale ? item.kg_per_unit : (item.unit === 'kg' || item.unit === 'litro' ? '0.5' : '1')}
+                                                                    step={item.isFractionalSale ? item.price_per_kg : (item.unit === 'kg' || item.unit === 'litro' ? '0.5' : '1')}
                                                                     max={item.stock}
                                                                     value={item.quantity.toString()}
                                                                     onChange={(e) =>
@@ -622,11 +610,7 @@ export default function SalesCreate({ products }: Props) {
                                 </button>
 
                                 {/* Opción: Venta Fraccionada (solo si están disponibles los datos) */}
-                                {productModalOpen.allow_fractional_sale &&
-                                    productModalOpen.price_per_kg !== null &&
-                                    productModalOpen.price_per_kg !== undefined &&
-                                    productModalOpen.kg_per_unit !== null &&
-                                    productModalOpen.kg_per_unit !== undefined && (
+                                {productModalOpen.allow_fractional_sale && productModalOpen.price_per_kg && productModalOpen.kg_per_unit && (
                                         <>
                                             <Divider className="my-2" />
                                             <button
