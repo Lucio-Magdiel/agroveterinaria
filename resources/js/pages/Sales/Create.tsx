@@ -69,6 +69,7 @@ export default function SalesCreate({ products }: Props) {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [productModalOpen, setProductModalOpen] = useState<Product | null>(null);
 
     const { data, setData, post, processing, errors } = useForm({
         payment_method: 'efectivo',
@@ -83,19 +84,40 @@ export default function SalesCreate({ products }: Props) {
         }>,
     });
 
-    const addToCart = (productId: string) => {
+    const handleSelectProduct = (productId: string) => {
         const product = products.find((p) => p.id.toString() === productId);
         if (!product) return;
 
         setSearchQuery('');
         setShowDropdown(false);
 
+        // Si el producto permite venta fraccionada y tiene todos los datos configurados, mostrar modal para que elija el tipo de venta
+        if (
+            product.allow_fractional_sale &&
+            product.price_per_kg !== null &&
+            product.price_per_kg !== undefined &&
+            product.kg_per_unit !== null &&
+            product.kg_per_unit !== undefined
+        ) {
+            setProductModalOpen(product);
+        } else {
+            // Si no, agregar directamente con venta normal
+            addToCart(product, false);
+        }
+    };
+
+    const addToCart = (product: Product, isFractionalSale: boolean) => {
+        // Validación: si es venta fraccionada, asegurar que tenga precio_per_kg
+        if (isFractionalSale && (!product.price_per_kg || !product.kg_per_unit)) {
+            alert('Este producto no tiene configurados los datos para venta fraccionada');
+            return;
+        }
+
         const existingItem = cart.find(
             (item) => item.product_id === product.id
         );
 
-        const isFractionalSale = !!(product.allow_fractional_sale && product.price_per_kg && product.kg_per_unit);
-        const increment = isFractionalSale ? product.kg_per_unit! : (product.unit === 'kg' || product.unit === 'litro' ? 0.5 : 1);
+        const increment = isFractionalSale ? product.kg_per_unit : (product.unit === 'kg' || product.unit === 'litro' ? 0.5 : 1);
         const unitPrice = isFractionalSale ? product.price_per_kg! : product.sale_price;
 
         if (existingItem) {
@@ -106,7 +128,7 @@ export default function SalesCreate({ products }: Props) {
             setCart(
                 cart.map((item) =>
                     item.product_id === product.id
-                        ? { ...item, quantity: item.quantity + increment }
+                        ? { ...item, quantity: item.quantity + (increment ?? 0) }
                         : item
                 )
             );
@@ -118,7 +140,7 @@ export default function SalesCreate({ products }: Props) {
             const newItem: CartItem = {
                 product_id: product.id,
                 name: product.name,
-                quantity: increment,
+                quantity: increment ?? 0,
                 unit_price: unitPrice,
                 stock: product.stock,
                 unit: product.unit,
@@ -129,6 +151,7 @@ export default function SalesCreate({ products }: Props) {
             setCart([...cart, newItem]);
         }
         setSelectedProduct('');
+        setProductModalOpen(null);
     };
 
     const updateQuantity = (productId: number, quantity: number) => {
@@ -290,7 +313,7 @@ export default function SalesCreate({ products }: Props) {
                                                         <button
                                                             key={product.id}
                                                             type="button"
-                                                            onClick={() => addToCart(product.id.toString())}
+                                                            onClick={() => handleSelectProduct(product.id.toString())}
                                                             className="w-full px-4 py-3 hover:bg-default-100 dark:hover:bg-default-50/10 text-left border-b border-default-200 dark:border-default-100 last:border-0 transition-colors"
                                                         >
                                                             <div className="flex items-center justify-between">
@@ -300,11 +323,21 @@ export default function SalesCreate({ products }: Props) {
                                                                     </p>
                                                                     <p className="text-xs text-default-500">
                                                                         SKU: {product.sku} | Stock: {product.stock}
+                                                                        {product.allow_fractional_sale && product.price_per_kg && (
+                                                                            <span className="ml-2 text-success font-medium">| Venta fraccionada disponible</span>
+                                                                        )}
                                                                     </p>
                                                                 </div>
-                                                                <p className="font-semibold text-primary">
-                                                                    {formatCurrency(product.sale_price)}
-                                                                </p>
+                                                                <div className="text-right">
+                                                                    <p className="font-semibold text-primary">
+                                                                        {formatCurrency(product.sale_price)}
+                                                                    </p>
+                                                                    {product.allow_fractional_sale && product.price_per_kg && (
+                                                                        <p className="text-xs text-success">
+                                                                            {formatCurrency(product.price_per_kg)}/kg
+                                                                        </p>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </button>
                                                     ))}
@@ -331,7 +364,7 @@ export default function SalesCreate({ products }: Props) {
                                         >
                                             <TableHeader>
                                                 <TableColumn>PRODUCTO</TableColumn>
-                                                <TableColumn>P. UNIT</TableColumn>
+                                                <TableColumn>PRECIO</TableColumn>
                                                 <TableColumn>CANTIDAD</TableColumn>
                                                 <TableColumn>SUBTOTAL</TableColumn>
                                                 <TableColumn>ACCION</TableColumn>
@@ -352,12 +385,14 @@ export default function SalesCreate({ products }: Props) {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            {formatCurrency(
-                                                                item.unit_price
-                                                            )}
-                                                            {item.isFractionalSale && (
-                                                                <p className="text-xs text-default-500">/kg</p>
-                                                            )}
+                                                            <div>
+                                                                <p className="font-semibold">
+                                                                    {formatCurrency(item.unit_price)}
+                                                                </p>
+                                                                <p className="text-xs text-default-500">
+                                                                    {item.isFractionalSale ? '/kg' : `/${item.unit}`}
+                                                                </p>
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell>
                                                             <div className="flex items-center gap-2">
@@ -548,6 +583,89 @@ export default function SalesCreate({ products }: Props) {
                         </div>
                     </div>
                 </form>
+
+                {/* Modal de selección de tipo de venta */}
+                {productModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 rounded-lg">
+                        <Card className="w-full max-w-md mx-4 dark:bg-[#18181b] border-none shadow-2xl">
+                            <CardHeader className="pb-4 px-6 pt-6">
+                                <div>
+                                    <h3 className="text-lg font-bold text-default-700 dark:text-default-200">
+                                        {productModalOpen.name}
+                                    </h3>
+                                    <p className="text-sm text-default-500 mt-1">
+                                        Selecciona cómo deseas vender este producto
+                                    </p>
+                                </div>
+                            </CardHeader>
+                            <CardBody className="gap-4">
+                                {/* Opción: Venta Normal */}
+                                <button
+                                    onClick={() => addToCart(productModalOpen, false)}
+                                    className="p-4 border-2 border-default-300/40 rounded-xl hover:bg-default-100 dark:hover:bg-default-100/10 transition-colors text-left"
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-default-700 dark:text-default-200">
+                                                Venta Normal
+                                            </p>
+                                            <p className="text-xs text-default-500 mt-1">
+                                                Por {productModalOpen.unit} a {formatCurrency(productModalOpen.sale_price)} c/u
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold text-primary">
+                                                {formatCurrency(productModalOpen.sale_price)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {/* Opción: Venta Fraccionada (solo si están disponibles los datos) */}
+                                {productModalOpen.allow_fractional_sale &&
+                                    productModalOpen.price_per_kg !== null &&
+                                    productModalOpen.price_per_kg !== undefined &&
+                                    productModalOpen.kg_per_unit !== null &&
+                                    productModalOpen.kg_per_unit !== undefined && (
+                                        <>
+                                            <Divider className="my-2" />
+                                            <button
+                                                onClick={() => addToCart(productModalOpen, true)}
+                                                className="p-4 border-2 border-success-300 rounded-xl bg-success-50 dark:bg-success-50/10 hover:bg-success-100 dark:hover:bg-success-100/20 transition-colors text-left"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold text-success-700 dark:text-success-300">
+                                                            Venta Fraccionada
+                                                        </p>
+                                                        <p className="text-xs text-success-600 dark:text-success-400 mt-1">
+                                                            Por kilos a {formatCurrency(productModalOpen.price_per_kg)}/kg
+                                                            <br />
+                                                            (Se vende por incrementos de {productModalOpen.kg_per_unit} kg)
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-success">
+                                                            {formatCurrency(productModalOpen.price_per_kg)}/kg
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </>
+                                    )}
+
+                                {/* Botón de cierre */}
+                                <Button
+                                    variant="flat"
+                                    className="w-full mt-2"
+                                    onPress={() => setProductModalOpen(null)}
+                                >
+                                    Cancelar
+                                </Button>
+                            </CardBody>
+                        </Card>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
