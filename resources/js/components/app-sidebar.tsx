@@ -74,15 +74,31 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<any>().props;
     const isAdmin = auth?.user?.roles?.some((role: any) => role.name === 'Administrador');
+    const isSeller = auth?.user.roles?.some((role:any) => role.name === "Vendedor");
 
     // Agregar item de usuarios si es admin
-    const navItems = [...mainNavItems];
+    let navItems = [...mainNavItems];
     if (isAdmin) {
         navItems.push({
             title: 'Usuarios',
             href: '/users',
             icon: Users,
         });
+    }
+
+    if (isSeller) {
+        navItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Ventas',
+                href: '/sales',
+                icon: ShoppingCart,
+            }
+        ]
     }
 
     return (
