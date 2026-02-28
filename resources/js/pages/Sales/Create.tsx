@@ -181,9 +181,6 @@ export default function SalesCreate({ products }: Props) {
     };
 
     const getQuantityStep = (item: CartItem) => {
-        if (item.isFractionalSale) {
-            return item.kg_per_unit ?? 0.01;
-        }
 
         return item.unit === 'kg' || item.unit === 'litro' ? 0.5 : 1;
     };
