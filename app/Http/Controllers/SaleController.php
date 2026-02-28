@@ -63,22 +63,37 @@ class SaleController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.is_fractional_sale' => 'nullable|boolean',
+            'items.*.price_per_kg' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Verificar stock disponible
+            // Verificar stock disponible y calcular unidades a descontar
+            $itemsWithUnits = [];
             foreach ($validated['items'] as $item) {
                 $product = Product::findOrFail($item['product_id']);
-                if ($product->stock < $item['quantity']) {
+                $isFractionalSale = $item['is_fractional_sale'] ?? false;
+                
+                // Para ventas fraccionadas, calcular cuántas unidades se descargan
+                $unitsToDeduct = $isFractionalSale 
+                    ? ceil($item['quantity'] / ($product->kg_per_unit ?? 1))
+                    : $item['quantity'];
+                
+                if ($product->stock < $unitsToDeduct) {
                     return back()->with('error', "Stock insuficiente para el producto: {$product->name}");
                 }
+                
+                $itemsWithUnits[] = array_merge($item, [
+                    'units_to_deduct' => $unitsToDeduct,
+                    'is_fractional_sale' => $isFractionalSale,
+                ]);
             }
 
             // Calcular totales
             $subtotal = 0;
-            foreach ($validated['items'] as $item) {
+            foreach ($itemsWithUnits as $item) {
                 $subtotal += $item['quantity'] * $item['unit_price'];
             }
 
@@ -96,9 +111,10 @@ class SaleController extends Controller
             ]);
 
             // Crear detalles y actualizar inventario
-            foreach ($validated['items'] as $item) {
+            foreach ($itemsWithUnits as $item) {
                 $product = Product::findOrFail($item['product_id']);
                 $itemSubtotal = $item['quantity'] * $item['unit_price'];
+                $unitsToDeduct = $item['units_to_deduct'];
 
                 // Crear detalle de venta
                 SaleDetail::create([
@@ -111,12 +127,12 @@ class SaleController extends Controller
 
                 // Registrar movimiento de inventario
                 $previousStock = $product->stock;
-                $newStock = $previousStock - $item['quantity'];
+                $newStock = $previousStock - $unitsToDeduct;
 
                 InventoryMovement::create([
                     'product_id' => $product->id,
                     'type' => 'exit',
-                    'quantity' => $item['quantity'],
+                    'quantity' => $unitsToDeduct,
                     'previous_stock' => $previousStock,
                     'new_stock' => $newStock,
                     'reason' => 'Venta #' . $sale->sale_number,
@@ -159,14 +175,24 @@ class SaleController extends Controller
             // Restaurar stock
             foreach ($sale->details as $detail) {
                 $product = $detail->product;
-                $product->increment('stock', $detail->quantity);
+                
+                // Obtener el movimiento de inventario original para saber cuántas unidades se descuentaron
+                $originalMovement = InventoryMovement::where('sale_id', $sale->id)
+                    ->where('product_id', $product->id)
+                    ->where('type', 'exit')
+                    ->first();
+                
+                // Usar la cantidad de unidades descuentadas del movimiento original
+                $unitsToRestore = $originalMovement ? $originalMovement->quantity : $detail->quantity;
+                
+                $product->increment('stock', $unitsToRestore);
 
                 // Registrar movimiento de inventario
                 InventoryMovement::create([
                     'product_id' => $product->id,
                     'type' => 'entry',
-                    'quantity' => $detail->quantity,
-                    'previous_stock' => $product->stock - $detail->quantity,
+                    'quantity' => $unitsToRestore,
+                    'previous_stock' => $product->stock - $unitsToRestore,
                     'new_stock' => $product->stock,
                     'reason' => 'Cancelación de venta #' . $sale->sale_number,
                     'user_id' => auth()->id(),

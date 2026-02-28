@@ -42,6 +42,9 @@ interface Product {
     category: {
         name: string;
     };
+    price_per_kg?: number;
+    kg_per_unit?: number;
+    allow_fractional_sale: boolean;
 }
 
 interface CartItem {
@@ -51,6 +54,9 @@ interface CartItem {
     unit_price: number;
     stock: number;
     unit: string;
+    isFractionalSale: boolean;
+    price_per_kg?: number;
+    kg_per_unit?: number;
 }
 
 interface Props {
@@ -72,6 +78,8 @@ export default function SalesCreate({ products }: Props) {
             product_id: number;
             quantity: number;
             unit_price: number;
+            is_fractional_sale?: boolean;
+            price_per_kg?: number;
         }>,
     });
 
@@ -86,7 +94,9 @@ export default function SalesCreate({ products }: Props) {
             (item) => item.product_id === product.id
         );
 
-        const increment = product.unit === 'kg' || product.unit === 'litro' ? 0.5 : 1;
+        const isFractionalSale = !!(product.allow_fractional_sale && product.price_per_kg && product.kg_per_unit);
+        const increment = isFractionalSale ? product.kg_per_unit! : (product.unit === 'kg' || product.unit === 'litro' ? 0.5 : 1);
+        const unitPrice = isFractionalSale ? product.price_per_kg! : product.sale_price;
 
         if (existingItem) {
             if (existingItem.quantity >= product.stock) {
@@ -105,17 +115,18 @@ export default function SalesCreate({ products }: Props) {
                 alert('Producto sin stock');
                 return;
             }
-            setCart([
-                ...cart,
-                {
-                    product_id: product.id,
-                    name: product.name,
-                    quantity: increment,
-                    unit_price: product.sale_price,
-                    stock: product.stock,
-                    unit: product.unit,
-                },
-            ]);
+            const newItem: CartItem = {
+                product_id: product.id,
+                name: product.name,
+                quantity: increment,
+                unit_price: unitPrice,
+                stock: product.stock,
+                unit: product.unit,
+                isFractionalSale,
+                price_per_kg: product.price_per_kg,
+                kg_per_unit: product.kg_per_unit,
+            };
+            setCart([...cart, newItem]);
         }
         setSelectedProduct('');
     };
@@ -129,7 +140,8 @@ export default function SalesCreate({ products }: Props) {
             return;
         }
 
-        if (quantity > item.stock) {
+        const maxQuantity = item.isFractionalSale ? item.stock : item.stock;
+        if (quantity > maxQuantity) {
             alert('No hay suficiente stock');
             return;
         }
@@ -164,6 +176,8 @@ export default function SalesCreate({ products }: Props) {
             product_id: item.product_id,
             quantity: item.quantity,
             unit_price: item.unit_price,
+            is_fractional_sale: item.isFractionalSale || false,
+            price_per_kg: item.price_per_kg,
         }));
 
         let wasSuccess = false;
@@ -298,16 +312,16 @@ export default function SalesCreate({ products }: Props) {
                                                     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                                     product.sku.toLowerCase().includes(searchQuery.toLowerCase())
                                                 ).length === 0 && (
-                                                    <div className="px-4 py-3 text-center text-default-500">
-                                                        No se encontraron productos
-                                                    </div>
-                                                )}
+                                                        <div className="px-4 py-3 text-center text-default-500">
+                                                            No se encontraron productos
+                                                        </div>
+                                                    )}
                                             </div>
                                         )}
                                     </div>
 
                                     {cart.length > 0 ? (
-                                        <Table 
+                                        <Table
                                             aria-label="Carrito de compras"
                                             classNames={{
                                                 wrapper: "rounded-2xl shadow-none",
@@ -318,9 +332,9 @@ export default function SalesCreate({ products }: Props) {
                                             <TableHeader>
                                                 <TableColumn>PRODUCTO</TableColumn>
                                                 <TableColumn>P. UNIT</TableColumn>
-                                                <TableColumn>CANT</TableColumn>
+                                                <TableColumn>CANTIDAD</TableColumn>
                                                 <TableColumn>SUBTOTAL</TableColumn>
-                                                <TableColumn>ACCIÓN</TableColumn>
+                                                <TableColumn>ACCION</TableColumn>
                                             </TableHeader>
                                             <TableBody>
                                                 {cart.map((item) => (
@@ -328,11 +342,21 @@ export default function SalesCreate({ products }: Props) {
                                                         key={item.product_id}
                                                     >
                                                         <TableCell>
-                                                            {item.name}
+                                                            <div>
+                                                                <p className="font-semibold">{item.name}</p>
+                                                                {item.isFractionalSale && (
+                                                                    <p className="text-xs text-success">
+                                                                        Venta fraccionada: {item.kg_per_unit} kg por unidad
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell>
                                                             {formatCurrency(
                                                                 item.unit_price
+                                                            )}
+                                                            {item.isFractionalSale && (
+                                                                <p className="text-xs text-default-500">/kg</p>
                                                             )}
                                                         </TableCell>
                                                         <TableCell>
@@ -340,7 +364,7 @@ export default function SalesCreate({ products }: Props) {
                                                                 <Input
                                                                     type="number"
                                                                     min="0.01"
-                                                                    step={item.unit === 'kg' || item.unit === 'litro' ? '0.5' : '1'}
+                                                                    step={item.isFractionalSale ? item.kg_per_unit : (item.unit === 'kg' || item.unit === 'litro' ? '0.5' : '1')}
                                                                     max={item.stock}
                                                                     value={item.quantity.toString()}
                                                                     onChange={(e) =>
@@ -357,14 +381,14 @@ export default function SalesCreate({ products }: Props) {
                                                                     size="sm"
                                                                 />
                                                                 <span className="text-xs text-default-500 whitespace-nowrap">
-                                                                    {item.unit}
+                                                                    {item.isFractionalSale ? `kg (${item.quantity} / ${item.stock}u)` : item.unit}
                                                                 </span>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="font-semibold">
                                                             {formatCurrency(
                                                                 item.quantity *
-                                                                    item.unit_price
+                                                                item.unit_price
                                                             )}
                                                         </TableCell>
                                                         <TableCell>
@@ -434,7 +458,7 @@ export default function SalesCreate({ products }: Props) {
                                             >
                                                 <SelectItem
                                                     key="efectivo"
-                                            >
+                                                >
                                                     💵 Efectivo
                                                 </SelectItem>
                                                 <SelectItem key="yape">
