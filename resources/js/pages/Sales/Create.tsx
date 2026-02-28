@@ -180,6 +180,14 @@ export default function SalesCreate({ products }: Props) {
         return cart.reduce((sum, item) => sum + calculateItemSubtotal(item), 0);
     };
 
+    const getQuantityStep = (item: CartItem) => {
+        if (item.isFractionalSale) {
+            return item.kg_per_unit ?? 0.01;
+        }
+
+        return item.unit === 'kg' || item.unit === 'litro' ? 0.5 : 1;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -391,8 +399,8 @@ export default function SalesCreate({ products }: Props) {
                                                             <div className="flex items-center gap-2">
                                                                 <Input
                                                                     type="number"
-                                                                    min="0.01"
-                                                                    step={item.isFractionalSale ? item.price_per_kg : (item.unit === 'kg' || item.unit === 'litro' ? '0.5' : '1')}
+                                                                    min={getQuantityStep(item)}
+                                                                    step={getQuantityStep(item)}
                                                                     max={item.stock}
                                                                     value={item.quantity.toString()}
                                                                     onChange={(e) =>
