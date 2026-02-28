@@ -411,7 +411,7 @@ export default function SalesCreate({ products }: Props) {
                                                         <TableCell className="font-semibold">
                                                             {formatCurrency(
                                                                 item.quantity *
-                                                                item.unit_price
+                                                                (item.price_per_kg ?? item.unit_price)
                                                             )}
                                                         </TableCell>
                                                         <TableCell>
@@ -611,32 +611,32 @@ export default function SalesCreate({ products }: Props) {
 
                                 {/* Opción: Venta Fraccionada (solo si están disponibles los datos) */}
                                 {productModalOpen.allow_fractional_sale && productModalOpen.price_per_kg && productModalOpen.kg_per_unit && (
-                                        <>
-                                            <Divider className="my-2" />
-                                            <button
-                                                onClick={() => addToCart(productModalOpen, true)}
-                                                className="p-4 border-2 border-success-300 rounded-xl bg-success-50 dark:bg-success-50/10 hover:bg-success-100 dark:hover:bg-success-100/20 transition-colors text-left"
-                                            >
-                                                <div className="flex items-start gap-3">
-                                                    <div className="flex-1">
-                                                        <p className="font-semibold text-success-700 dark:text-success-300">
-                                                            Venta Fraccionada
-                                                        </p>
-                                                        <p className="text-xs text-success-600 dark:text-success-400 mt-1">
-                                                            Por kilos a {formatCurrency(productModalOpen.price_per_kg)}/kg
-                                                            <br />
-                                                            (Se vende por incrementos de {productModalOpen.kg_per_unit} kg)
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-bold text-success">
-                                                            {formatCurrency(productModalOpen.price_per_kg)}/kg
-                                                        </p>
-                                                    </div>
+                                    <>
+                                        <Divider className="my-2" />
+                                        <button
+                                            onClick={() => addToCart(productModalOpen, true)}
+                                            className="p-4 border-2 border-success-300 rounded-xl bg-success-50 dark:bg-success-50/10 hover:bg-success-100 dark:hover:bg-success-100/20 transition-colors text-left"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-success-700 dark:text-success-300">
+                                                        Venta Fraccionada
+                                                    </p>
+                                                    <p className="text-xs text-success-600 dark:text-success-400 mt-1">
+                                                        Por kilos a {formatCurrency(productModalOpen.price_per_kg)}/kg
+                                                        <br />
+                                                        (Se vende por incrementos de {productModalOpen.kg_per_unit} kg)
+                                                    </p>
                                                 </div>
-                                            </button>
-                                        </>
-                                    )}
+                                                <div className="text-right">
+                                                    <p className="font-bold text-success">
+                                                        {formatCurrency(productModalOpen.price_per_kg)}/kg
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </>
+                                )}
 
                                 {/* Botón de cierre */}
                                 <Button
