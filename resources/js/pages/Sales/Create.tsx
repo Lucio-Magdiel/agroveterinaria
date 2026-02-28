@@ -168,11 +168,16 @@ export default function SalesCreate({ products }: Props) {
         setCart(cart.filter((item) => item.product_id !== productId));
     };
 
+    const getEffectiveUnitPrice = (item: CartItem) => {
+        return item.price_per_kg ?? item.unit_price;
+    };
+
+    const calculateItemSubtotal = (item: CartItem) => {
+        return item.quantity * getEffectiveUnitPrice(item);
+    };
+
     const calculateTotal = () => {
-        return cart.reduce(
-            (sum, item) => sum + item.quantity * item.unit_price,
-            0
-        );
+        return cart.reduce((sum, item) => sum + calculateItemSubtotal(item), 0);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -186,7 +191,7 @@ export default function SalesCreate({ products }: Props) {
         const items = cart.map((item) => ({
             product_id: item.product_id,
             quantity: item.quantity,
-            unit_price: item.unit_price,
+            unit_price: getEffectiveUnitPrice(item),
             is_fractional_sale: item.isFractionalSale || false,
             price_per_kg: item.price_per_kg,
         }));
@@ -409,10 +414,7 @@ export default function SalesCreate({ products }: Props) {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="font-semibold">
-                                                            {formatCurrency(
-                                                                item.quantity *
-                                                                (item.price_per_kg ?? item.unit_price)
-                                                            )}
+                                                            {formatCurrency(calculateItemSubtotal(item))}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Button
