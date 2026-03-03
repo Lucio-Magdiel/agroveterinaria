@@ -27,6 +27,16 @@ class DatabaseSeeder extends Seeder
         );
         $admin->assignRole('Administrador');
 
+        $developer = User::firstOrCreate(
+            ['email' => 'dev@admin.com'],
+            [
+                'name' => 'developer',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+        $developer->assignRole('Administrador');
+
         // Crear usuario vendedor de prueba
         $vendedor = User::firstOrCreate(
             ['email' => 'vendedor@agroveterinaria.com'],
