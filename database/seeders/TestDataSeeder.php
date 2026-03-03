@@ -14,7 +14,6 @@ class TestDataSeeder extends Seeder
         $categories = [
             'alimentos' => ['name' => 'Alimentos para Animales', 'description' => 'Alimentos balanceados y suplementos', 'is_active' => true],
             'medicamentos' => ['name' => 'Medicamentos Veterinarios', 'description' => 'Medicinas y tratamientos para animales', 'is_active' => true],
-            'herramientas' => ['name' => 'Herramientas Agrícolas', 'description' => 'Herramientas para el campo', 'is_active' => true],
             'fertilizantes' => ['name' => 'Fertilizantes', 'description' => 'Fertilizantes y abonos', 'is_active' => true],
         ];
 
