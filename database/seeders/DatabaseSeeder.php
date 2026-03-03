@@ -60,6 +60,6 @@ class DatabaseSeeder extends Seeder
        // $almacenero->assignRole('Almacenero');
 
         // Crear datos de prueba
-        $this->call(TestDataSeeder::class);
+        //$this->call(TestDataSeeder::class);
     }
 }
