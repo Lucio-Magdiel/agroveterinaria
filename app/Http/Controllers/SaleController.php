@@ -45,6 +45,7 @@ class SaleController extends Controller
     {
         $products = Product::where('is_active', true)
             ->where('stock', '>', 0)
+            ->where('is_stored', false)
             ->with('category')
             ->get();
 

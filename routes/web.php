@@ -3,6 +3,7 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StoreController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\InventoryMovementController;
 use App\Http\Controllers\SaleController;
@@ -25,7 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Productos
     Route::patch('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
+    Route::patch('products/{product}/toggle-stored', [ProductController::class, 'toggleStored'])->name('products.toggle-stored');
     Route::resource('products', ProductController::class)->except(['show', 'create', 'edit']);
+    Route::patch('store/{product}/toggle-stored', [StoreController::class, 'toggleStored'])->name('store.toggle-stored');
+    Route::resource('store', StoreController::class)->except(['show', 'create', 'edit']);
 
     // Ventas
     Route::resource('sales', SaleController::class);

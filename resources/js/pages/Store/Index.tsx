@@ -98,21 +98,11 @@ export default function ProductsIndex({
         is_active: true,
     });
 
-    const transferProduct = (id: number, isStored: boolean) => {
-        console.log(id);
-        router.patch(
-            `/products/${id}/toggle-stored`,
-            { is_stored: isStored },
-            {
-                onSuccess: () => {
-                    closeModal();
-                },
-                onError: (e) => {
-                    console.log(e);
-                },
-            },
-        );
-    };
+    console.log(products);
+
+    const products_ = products.data.filter(
+        (product) => product.is_stored === true,
+    );
 
     const openModal = (product?: Product) => {
         if (product) {
@@ -146,21 +136,39 @@ export default function ProductsIndex({
         reset();
     };
 
+    const transferProduct = (id: number, isStored: boolean) => {
+        console.log(id);
+        router.patch(
+            `/store/${id}/toggle-stored`,
+            { is_stored: isStored },
+            {
+                onSuccess: () => {
+                    closeModal();
+                },
+                onError: (e) => {
+                    console.log(e);
+                },
+            },
+        );
+        setProductToMove(null);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const url = editingProduct
-            ? `/products/${editingProduct.id}`
-            : '/products';
+        const url = editingProduct ? `/store/${editingProduct.id}` : '/store';
 
         const method = editingProduct ? 'put' : 'post';
 
         router[method](
             url,
-            { ...data, is_stored: false },
+            { ...data, is_stored: true },
             {
                 onSuccess: () => {
                     closeModal();
+                },
+                onError: (e) => {
+                    console.log(e);
                 },
             },
         );
@@ -168,13 +176,13 @@ export default function ProductsIndex({
 
     const handleDelete = (id: number) => {
         if (confirm('¿Estás seguro de eliminar este producto?')) {
-            router.delete(`/products/${id}`);
+            router.delete(`/store/${id}`);
         }
     };
 
     const handleSearch = () => {
         router.get(
-            '/products',
+            '/store',
             { search, category_id: categoryFilter },
             { preserveState: true },
         );
@@ -282,7 +290,7 @@ export default function ProductsIndex({
                                 <TableColumn>ACCIONES</TableColumn>
                             </TableHeader>
                             <TableBody>
-                                {products.data.map((product) => (
+                                {products_.map((product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <div>
@@ -343,7 +351,7 @@ export default function ProductsIndex({
                                                     : 'Inactivo'}
                                             </Button>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="">
                                             <div className="flex gap-1">
                                                 <Button
                                                     isIconOnly
@@ -371,7 +379,7 @@ export default function ProductsIndex({
 
                                                 <Button
                                                     size="sm"
-                                                    onPress={() => {
+                                                    onClick={() => {
                                                         setProductToMove(
                                                             product,
                                                         );
@@ -379,11 +387,10 @@ export default function ProductsIndex({
                                                             true,
                                                         );
                                                     }}
-                                                    type="button"
                                                     className="rounded-2xl bg-blue-500 text-white"
                                                 >
                                                     <ArrowRight />
-                                                    Mover a Almacen
+                                                    Mover para venta
                                                 </Button>
                                                 {isMoveProductModalOpen && (
                                                     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -409,25 +416,28 @@ export default function ProductsIndex({
                                                                             <h2 className="text-2xl font-bold">
                                                                                 Mover
                                                                                 Producto
-                                                                                al
-                                                                                Almacen
                                                                             </h2>
                                                                         </div>
                                                                     </div>
                                                                     <Button
                                                                         isIconOnly
                                                                         variant="light"
-                                                                        onPress={() =>
+                                                                        onPress={() => {
+                                                                            setProductToMove(
+                                                                                null,
+                                                                            );
                                                                             setIsMoveProductModalOpen(
                                                                                 false,
-                                                                            )
-                                                                        }
+                                                                            );
+                                                                        }}
                                                                         className="rounded-full"
                                                                         size="lg"
                                                                     >
                                                                         <X className="h-6 w-6" />
                                                                     </Button>
                                                                 </div>
+
+                                                                {/* Body */}
                                                                 <div className="space-y-8 bg-white p-8 dark:bg-[#09090b]">
                                                                     <p>
                                                                         ¿Esta
@@ -440,10 +450,13 @@ export default function ProductsIndex({
                                                                         El
                                                                         producto
                                                                         pasara a
-                                                                        estar la
+                                                                        estar
+                                                                        disponible
+                                                                        en la
                                                                         seccion
                                                                         de
-                                                                        Almacen
+                                                                        ventas y
+                                                                        productos.
                                                                     </p>
                                                                 </div>
 
@@ -468,18 +481,18 @@ export default function ProductsIndex({
                                                                         color="primary"
                                                                         type="submit"
                                                                         size="lg"
-                                                                        onPress={() => {
+                                                                        onPress={() =>
                                                                             transferProduct(
                                                                                 productToMove.id,
                                                                                 productToMove.is_stored,
-                                                                            );
-                                                                        }}
+                                                                            )
+                                                                        }
                                                                         className="rounded-xl px-8 font-semibold"
                                                                     >
                                                                         Mover
                                                                         Producto
-                                                                        al
-                                                                        Almacen
+                                                                        para
+                                                                        venta
                                                                     </Button>
                                                                 </div>
                                                             </form>
