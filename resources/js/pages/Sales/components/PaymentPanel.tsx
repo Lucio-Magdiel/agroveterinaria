@@ -19,7 +19,7 @@ export function PaymentPanel({
     onNotesChange,
 }: PaymentPanelProps) {
     return (
-        <Card className="rounded-3xl border-none shadow-2xl dark:bg-[#18181b]">
+        <Card className="rounded-3xl border-none rounded-2xlshadow-2xl dark:bg-[#18181b]">
             <CardHeader className="px-6 pt-6 pb-4">
                 <h3 className="flex items-center gap-2 text-lg font-semibold">
                     <CreditCard className="h-5 w-5" />

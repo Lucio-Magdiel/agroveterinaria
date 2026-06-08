@@ -15,7 +15,7 @@ export function OrderSummary({ cart, total, processing }: OrderSummaryProps) {
 
     return (
         <>
-            <Card className="rounded-3xl border-2 border-primary shadow-2xl dark:bg-[#18181b]">
+            <Card className="rounded-3xl border-2 border-primary rounded-2xl shadow-2xl dark:bg-[#18181b]">
                 <CardBody>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
